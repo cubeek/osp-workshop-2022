@@ -1,2 +1,7 @@
 ---
-# tasks file for restore
+- name: download simple snapshot script
+  get_url:
+    url: "{{ simple_snapshot_url }}"
+    dest: /tmp/simple_snapshot.sh
+    mode: 0755
+    md5sum: 012e455c4bd272057c5e6031bffa746c
