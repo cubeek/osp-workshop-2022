@@ -1,0 +1,6 @@
+---
+- name: "{{ snapshot_action }} virtual environment using {{ backup_name }} backup name"
+  shell: "{{ workdir }}/{{ downloads_dir }}/{{ simple_snapshot_exec }} {{ snapshot_action }} {{ backup_name }}"
+  become: yes
+  register: output
+  failed_when: '"Domain snapshot not found" in output.stderr'

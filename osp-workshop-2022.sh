@@ -1,9 +1,10 @@
 #!/bin/bash
 
+
 WORKDIR=$(dirname "$0")
-ANSIBLE_PLAYBOOK="ansible-playbook -i $inventory_file"
 SCENARIO_NUM=5
 
+ansible_params=""
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
 backup_name=backup
 undercloud=stack@undercloud-0
@@ -35,15 +36,10 @@ EOF
 }
 
 
-function backup() {
+function do_snapshot() {
     check_and_get_inventory
 
-#    $ANSIBLE_PLAYBOOK playbook.yml --tags backup -e workdir=$WORKDIR
-}
-
-
-function restore() {
-    check_and_get_inventory
+    $ansible_playbook $WORKDIR/playbooks/snapshot.yml -e backup_name=$backup_name -e snapshot_action=$1
 }
 
 
@@ -65,6 +61,7 @@ ACTIONS:
 
 OPTIONS:
   -b VALUE        name for the backup (default: $backup_name)
+  -d VALUE        turn on debug for ansible
   -i VALUE        relative path to local inventory file (default: $inventory_file)
   -f VALUE        relative path to tripleo ansible inventory file on the remote undercloud host (default: $remote_inventory_file)
   -p VALUE        private key to use for the ssh connection to the undercloud (default: user SSH key)
@@ -78,10 +75,13 @@ EOF
 }
 
 
-while getopts "b:f:i:p:u:h" opt_key; do
+while getopts "b:df:i:p:u:h" opt_key; do
    case "$opt_key" in
        b)
            backup_name=$OPTARG
+           ;;
+       d)
+           ansible_params=-vv
            ;;
        f)
            remote_inventory_file=$OPTARG
@@ -100,6 +100,9 @@ while getopts "b:f:i:p:u:h" opt_key; do
            ;;
    esac
 done
+
+# This needs to be defined aftar parsing parameters because of variables passed
+ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e workdir=$WORKDIR"
 
 shift $((OPTIND-1))
 
@@ -124,10 +127,11 @@ case "$1" in
         prepare_scenario $2
         ;;
     "backup")
-        backup
+        # The backup action is called snapshot
+        do_snapshot snapshot
         ;;
     "restore")
-        restore
+        do_snapshot revert
         ;;
     *)
         usage
