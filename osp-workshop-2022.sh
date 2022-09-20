@@ -8,7 +8,7 @@ ansible_params=""
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
 backup_name=backup
 undercloud=stack@undercloud-0
-remote_inventory_file=tripleo-ansible-inventory.yaml
+remote_inventory_file=/home/stack/overcloud-deploy/overcloud/tripleo-ansible-inventory.yaml
 private_key=""
 
 
