@@ -1,0 +1,5 @@
+- name: "Create scenario 1"
+  hosts: undercloud
+  roles:
+    - scenario1
+  tags: scenario1

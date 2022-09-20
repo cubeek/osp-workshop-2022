@@ -23,6 +23,11 @@ function check_and_get_inventory() {
 
         scp $pass_key $undercloud:$remote_inventory_file $inventory_file
 
+        # Fix stupid TripleO
+        undercloud_ip=$(awk '/undercloud/{ print $1 }' /etc/hosts)
+        sed -i "s/ansible_host: localhost/ansible_host: $undercloud_ip/" $inventory_file
+        sed -i "/ansible_connection: local/d" $inventory_file
+
         if [ $? -ne 0 ]; then
             echo
             cat << EOF
@@ -44,9 +49,9 @@ function do_snapshot() {
 
 
 function prepare_scenario() {
-    local scenario_number=$1
-
     check_and_get_inventory
+
+    $ansible_playbook $WORKDIR/playbooks/scenario.yml -t scenario$1
 }
 
 
@@ -61,7 +66,7 @@ ACTIONS:
 
 OPTIONS:
   -b VALUE        name for the backup (default: $backup_name)
-  -d VALUE        turn on debug for ansible
+  -d              turn on debug for ansible
   -i VALUE        relative path to local inventory file (default: $inventory_file)
   -f VALUE        relative path to tripleo ansible inventory file on the remote undercloud host (default: $remote_inventory_file)
   -p VALUE        private key to use for the ssh connection to the undercloud (default: user SSH key)
