@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 source {{ overcloudrc_file }}
 
 # Create Cirros image
@@ -25,10 +27,6 @@ chmod 0600 ~/klicek.pem
 
 openstack server create --flavor m1.medium --image cirros --nic net-id=private-network --key-name klicek --security-group sg1 vm-private-network --wait
 openstack server show vm-private-network | grep -q "status.*ACTIVE"
-
-if [ $? -ne 0 ]; then
-    exit 1
-fi
 
 port_id=$(openstack port list --server vm-private-network -c ID -f value | head)
 fip=$(openstack floating ip create --port $port_id {{ public_network }} | grep floating_ip_address | awk '{ print $4 }')
