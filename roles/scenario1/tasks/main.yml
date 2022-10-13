@@ -8,13 +8,14 @@
 
 - name: Execute environment
   ansible.builtin.shell: "{{ create_env_file }}"
-  register: output
+  register: floating_ip
 
 - name: Delete environment file
   ansible.builtin.file:
     path: "{{ create_env_file }}"
     state: absent
 
-- name: Print floating ip
-  debug:
-    msg: "Try to SSH to cirros@{{ output.stdout_lines[-1] }}"
+- name: Create message
+  ansible.builtin.copy:
+    dest: "{{ workshop_message_file }}"
+    content: "Try to SSH to cirros@{{ floating_ip.stdout_lines[-1] }}"

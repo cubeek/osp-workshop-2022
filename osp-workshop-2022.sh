@@ -11,6 +11,7 @@ undercloud=stack@undercloud-0
 remote_inventory_file=/home/stack/overcloud-deploy/overcloud/tripleo-ansible-inventory.yaml
 private_key=""
 
+WORKSHOP_MESSAGE_FILE=/tmp/workshop_message
 
 
 function check_and_get_inventory() {
@@ -52,6 +53,11 @@ function prepare_scenario() {
     check_and_get_inventory
 
     $ansible_playbook $WORKDIR/playbooks/scenario.yml -t scenario$1
+
+    echo
+    echo
+    [ -e $WORKSHOP_MESSAGE_FILE ] && cat $WORKSHOP_MESSAGE_FILE
+    echo
 }
 
 
@@ -107,7 +113,7 @@ while getopts "b:df:i:p:u:h" opt_key; do
 done
 
 # This needs to be defined aftar parsing parameters because of variables passed
-ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e workdir=$WORKDIR"
+ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e workdir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
 
 shift $((OPTIND-1))
 
