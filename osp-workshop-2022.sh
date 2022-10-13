@@ -51,6 +51,7 @@ function do_snapshot() {
 
 function prepare_scenario() {
     check_and_get_inventory
+    rm -f $WORKSHOP_MESSAGE_FILE
 
     $ansible_playbook $WORKDIR/playbooks/scenario.yml -t scenario$1
 
