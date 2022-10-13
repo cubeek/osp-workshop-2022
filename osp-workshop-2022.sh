@@ -59,6 +59,7 @@ function prepare_scenario() {
     echo
     [ -e $WORKSHOP_MESSAGE_FILE ] && cat $WORKSHOP_MESSAGE_FILE
     echo
+    echo
 }
 
 
