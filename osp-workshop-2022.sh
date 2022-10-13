@@ -73,7 +73,7 @@ OPTIONS:
   -u VALUE        undercloud user and host (default: $undercloud)
   -h              display help
 
-NOTE: ACTION must be last argument!
+NOTE: ACTION must be the last argument!
 EOF
 
     exit 2
