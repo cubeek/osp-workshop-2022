@@ -19,3 +19,4 @@
   ansible.builtin.copy:
     dest: "{{ workshop_message_file }}"
     content: "Try to SSH to cirros@{{ floating_ip.stdout_lines[-1] }}"
+  delegate_to: 127.0.0.1
