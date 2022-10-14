@@ -47,12 +47,22 @@ function do_snapshot() {
 
     $ansible_playbook $WORKDIR/playbooks/snapshot.yml -e backup_name=$backup_name -e snapshot_action=$1
 
+    echo
     # Check that everything is fine
-    if virsh list --all | tail -n+3 | grep -v running -q; then
-        echo "Something went wrong with the VM states, check libvirt" 1>&2
-        virsh list --all 1>&2
-        exit 2
+    if virsh list --all | tail -n+3 | grep -q paused; then
+        echo "Some VMs got stuck in paused state, trying to fix it ..." 1>&2
+        for vm in $(virsh list --all | awk '/paused/{ print $ 2}'); do
+            virsh reset $vm
+            virsh resume $vm
+        done
+
+        if virsh list --all | tail -n+3 | head -n-1 | grep -v running | grep -q "-"; then
+            echo "Unable to resume some VMs, check libvirt" 1>&2
+            exit 2
+        fi
     fi
+
+    echo "$1 with $backup_name was successful"
 }
 
 
