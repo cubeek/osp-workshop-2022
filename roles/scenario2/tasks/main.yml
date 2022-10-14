@@ -1,0 +1,22 @@
+---
+# tasks file for scenario2
+- name: Upload scenario to the undercloud
+  ansible.builtin.template:
+    src: create_env.sh.j2
+    dest: "{{ create_env_file }}"
+    mode: '0755'
+
+- name: Execute environment
+  ansible.builtin.shell: "{{ create_env_file }}"
+  register: floating_ip
+
+- name: Delete environment file
+  ansible.builtin.file:
+    path: "{{ create_env_file }}"
+    state: absent
+
+- name: Create message
+  ansible.builtin.copy:
+    dest: "{{ workshop_message_file }}"
+    content: "Try to SSH to cirros@{{ floating_ip.stdout_lines[-1] }}"
+  delegate_to: 127.0.0.1

@@ -2,7 +2,7 @@
 
 
 WORKDIR=$(dirname "$0")
-SCENARIO_NUM=5
+SCENARIO_NUM=2
 
 ansible_params=""
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
@@ -70,7 +70,7 @@ function prepare_scenario() {
     check_and_get_inventory
     rm -f $WORKSHOP_MESSAGE_FILE
 
-    $ansible_playbook $WORKDIR/playbooks/scenario.yml -t scenario$1
+    $ansible_playbook $WORKDIR/playbooks/scenario.yml -e scenario=$1
 
     echo
     echo

@@ -1,5 +1,4 @@
-- name: "Create scenario 1"
+- name: "Create scenario {{ scenario }}"
   hosts: undercloud
   roles:
-    - scenario1
-  tags: scenario1
+    - "scenario{{ scenario }}"
