@@ -29,9 +29,10 @@ openstack security group rule create --ingress --protocol tcp --dst-port 22 scen
 openstack keypair create scenario-3-key > ~/scenario-3-key.pem
 chmod 0600 ~/scenario-3-key.pem
 
-openstack server create --flavor m1.tiny --image cirros-0.5.2-x86_64 --nic net-id=scenario-3-network --key-name scenario-3-key --security-group scenario-3-sg scenario-3-vm
+openstack server create --flavor m1.tiny --image cirros-0.5.2-x86_64 --nic net-id=scenario-3-network --key-name scenario-3-key --security-group scenario-3-sg scenario-3-vm --wait
+openstack server show scenario-1-vm | grep -q "status.*ACTIVE"
 
-port_id=$(openstack port list --server scenario-3-vm -c ID -f value | head)
+port_id=$(openstack port list --server scenario-1-vm -c ID -f value | head)
 fip=$(openstack floating ip create --port $port_id {{ public_network }} | grep floating_ip_address | awk '{ print $4 }')
 
 echo "$fip"
