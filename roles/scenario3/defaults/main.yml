@@ -1,5 +1,5 @@
 ---
-# defaults file for scenario1
+# defaults file for scenario3
 overcloudrc_file: /home/stack/overcloudrc
 public_network: public
 create_env_file: /home/stack/create_env.sh
