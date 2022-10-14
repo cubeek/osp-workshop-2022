@@ -62,7 +62,7 @@ function do_snapshot() {
         fi
     fi
 
-    echo "$1 with $backup_name was successful"
+    echo "$1 operation using backup name $backup_name was successful"
 }
 
 
