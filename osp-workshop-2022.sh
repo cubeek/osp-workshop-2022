@@ -46,6 +46,13 @@ function do_snapshot() {
     check_and_get_inventory
 
     $ansible_playbook $WORKDIR/playbooks/snapshot.yml -e backup_name=$backup_name -e snapshot_action=$1
+
+    # Check that everything is fine
+    if virsh list --all | tail -n+3 | grep -v running -q; then
+        echo "Something went wrong with the VM states, check libvirt" 1>&2
+        virsh list --all 1>&2
+        exit 2
+    fi
 }
 
 
