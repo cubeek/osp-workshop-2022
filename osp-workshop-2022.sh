@@ -61,7 +61,6 @@ function do_snapshot() {
             exit 2
         fi
 
-        sleep 10
     fi
 
     $ansible_playbook $WORKDIR/playbooks/sync.yml

@@ -6,6 +6,10 @@
   tasks:
     - name: Restart chronyd service
       ansible.builtin.command: systemctl restart chronyd
+      retries: 10
+      delay: 10
+      register: result
+      until: result.rc == 0
 
     - name: Run chronyc status
       ansible.builtin.command: chronyc sources
