@@ -26,8 +26,8 @@ openstack security group create scenario-4-sg
 openstack security group rule create --ingress --protocol icmp scenario-4-sg
 openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-4-sg
 
-openstack keypair create scenario-4-key > ~/scenario-4-key.pem
-chmod 0600 ~/scenario-4-key.pem
+openstack keypair create scenario-4-key > {{ ssh_key_file }}
+chmod 0600 {{ ssh_key_file }}
 
 openstack port delete $(openstack port list --device-id=ovnmeta-$network_id -f value -c ID)
 

@@ -26,8 +26,8 @@ openstack security group create scenario-3-sg
 openstack security group rule create --ingress --protocol icmp scenario-3-sg
 openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-3-sg
 
-openstack keypair create scenario-3-key > ~/scenario-3-key.pem
-chmod 0600 ~/scenario-3-key.pem
+openstack keypair create scenario-3-key > {{ ssh_key_file }}
+chmod 0600 {{ ssh_key_file }}
 
 openstack server create --flavor m1.tiny --image cirros-0.5.2-x86_64 --nic net-id=scenario-3-network --key-name scenario-3-key --security-group scenario-3-sg scenario-3-vm --wait
 openstack server show scenario-1-vm | grep -q "status.*ACTIVE"
