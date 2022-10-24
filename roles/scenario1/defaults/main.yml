@@ -3,3 +3,4 @@
 overcloudrc_file: /home/stack/overcloudrc
 public_network: public
 create_env_file: /home/stack/create_env.sh
+ssh_key_file: /tmp/scenario-1-key.pem

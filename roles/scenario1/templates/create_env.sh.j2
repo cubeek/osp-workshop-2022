@@ -24,8 +24,8 @@ openstack flavor show m1.medium > /dev/null 2> /dev/null || openstack flavor cre
 
 openstack security group create scenario-1-sg
 
-openstack keypair create scenario-1-key > ~/scenario-1-key.pem
-chmod 0600 ~/scenario-1-key.pem
+openstack keypair create scenario-1-key > {{ ssh_key_file }}
+chmod 0600 {{ ssh_key_file }}
 
 openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-1-network --key-name scenario-1-key --security-group scenario-1-sg scenario-1-vm --wait
 openstack server show scenario-1-vm | grep -q "status.*ACTIVE"
