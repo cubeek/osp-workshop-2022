@@ -62,6 +62,8 @@ function do_snapshot() {
         fi
     fi
 
+    $ansible_playbook $WORKDIR/playbooks/sync.yml
+
     echo "$1 operation using backup name $backup_name was successful"
 }
 

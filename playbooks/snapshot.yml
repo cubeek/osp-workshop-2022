@@ -5,19 +5,3 @@
   roles:
     - prepare
     - snapshot
-
-- name: sync clock
-  hosts: all
-  gather_facts: no
-  become: yes
-  tasks:
-    - name: Restart chronyd service
-      ansible.builtin.command: systemctl restart chronyd
-
-    - name: Run chronyc status
-      ansible.builtin.command: chronyc sources
-      ignore_errors: yes
-
-    - name: Run chronyc status once again to be safe
-      ansible.builtin.command: chronyc sources
-      ignore_errors: yes
