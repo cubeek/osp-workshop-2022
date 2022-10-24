@@ -60,6 +60,8 @@ function do_snapshot() {
             echo "Unable to resume some VMs, check libvirt" 1>&2
             exit 2
         fi
+
+        sleep 10
     fi
 
     $ansible_playbook $WORKDIR/playbooks/sync.yml
