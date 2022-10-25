@@ -1,0 +1,25 @@
+---
+- name: Download things
+  ansible.builtin.get_url:
+    url: "{{ ovn_hack_repo_url }}/{{ item }}"
+    dest: "/tmp/{{ item }}"
+  with_items:
+    - "{{ ovn_package }}"
+    - "{{ ovn_host_package }}"
+
+- name: Copy things
+  become: yes
+  shell: "podman cp /tmp/{{ item }} ovn_controller:/tmp/."
+  with_items:
+    - "{{ ovn_package }}"
+    - "{{ ovn_host_package }}"
+
+- name: Install things
+  become: yes
+  shell: "podman exec ovn_controller rpm -Uvh /tmp/{{ ovn_package }} /tmp/{{ ovn_host_package }}"
+
+- name: Restart things
+  become: yes
+  systemd:
+    state: restarted
+    name: tripleo_ovn_controller
