@@ -1,28 +1,5 @@
 ---
 # tasks file for scenario4
-- name: Upload scenario to the undercloud
-  ansible.builtin.template:
-    src: create_env.sh.j2
-    dest: "{{ create_env_file }}"
-    mode: '0755'
-
-- name: Execute environment
-  ansible.builtin.shell: "{{ create_env_file }}"
-  register: floating_ip
-
-- name: Delete environment file
-  ansible.builtin.file:
-    path: "{{ create_env_file }}"
-    state: absent
-
-- name: Fetch SSH key file
-  ansible.builtin.fetch:
-    src: "{{ ssh_key_file }}"
-    dest: "{{ ssh_key_file }}"
-    flat: yes
-
-- name: Create message
-  ansible.builtin.copy:
-    dest: "{{ workshop_message_file }}"
-    content: "Try running following command: ssh -i {{ ssh_key_file }} cirros@{{ floating_ip.stdout_lines[-1] }}"
-  delegate_to: 127.0.0.1
+- name: Run undercloud tasks
+  ansible.builtin.include_tasks: undercloud.yml
+  when: ansible_hostname == "undercloud-0"
