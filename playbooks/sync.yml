@@ -4,12 +4,13 @@
   gather_facts: no
   become: yes
   tasks:
+    - name: Wait for all hosts to be reachable
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 60
+
     - name: Restart chronyd service
       ansible.builtin.command: systemctl restart chronyd
-      retries: 10
-      delay: 10
-      register: result
-      until: result.rc == 0
 
     - name: Run chronyc status
       ansible.builtin.command: chronyc sources
