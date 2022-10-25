@@ -14,8 +14,8 @@
 
     - name: Run chronyc status
       ansible.builtin.command: chronyc sources
-      ignore_errors: yes
-
-    - name: Run chronyc status once again to be safe
-      ansible.builtin.command: chronyc sources
-      ignore_errors: yes
+      retries: 10
+      delay: 5
+      register: result
+      until: result.rc == 0
+      ignore_errors: true
