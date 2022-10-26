@@ -1,6 +1,5 @@
 ---
-# defaults file for scenario2
 overcloudrc_file: /home/stack/overcloudrc
 public_network: public
 create_env_file: /home/stack/create_env.sh
-ssh_key_file: /tmp/scenario-2-key.pem
+ssh_key_file: /tmp/scenario-{{ scenario }}-key.pem
