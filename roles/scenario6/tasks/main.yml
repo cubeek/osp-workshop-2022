@@ -1,0 +1,5 @@
+---
+# tasks file for scenario6
+- name: Run undercloud tasks
+  ansible.builtin.include_tasks: undercloud.yml
+  when: ansible_hostname == "undercloud-0"

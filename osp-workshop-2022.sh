@@ -2,7 +2,7 @@
 
 
 WORKDIR=$(dirname "$0")
-SCENARIO_NUM=5
+SCENARIO_NUM=6
 
 ansible_params=""
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
