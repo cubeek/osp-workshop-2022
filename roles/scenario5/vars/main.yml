@@ -1,4 +1,3 @@
 ---
-ovn_hack_repo_url: http://10.40.128.51/ovn22.03-hack
 ovn_package: ovn22.03-22.03.0-70hack.el9fdp.x86_64.rpm
 ovn_host_package: ovn22.03-host-22.03.0-70hack.el9fdp.x86_64.rpm

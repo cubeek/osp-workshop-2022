@@ -1,7 +1,7 @@
 ---
 - name: Download things
-  ansible.builtin.get_url:
-    url: "{{ ovn_hack_repo_url }}/{{ item }}"
+  ansible.builtin.copy:
+    src: "{{ item }}"
     dest: "/tmp/{{ item }}"
   with_items:
     - "{{ ovn_package }}"
