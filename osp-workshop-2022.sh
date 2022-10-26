@@ -73,13 +73,29 @@ function prepare_scenario() {
     check_and_get_inventory
     rm -f $WORKSHOP_MESSAGE_FILE
 
-    $ansible_playbook $WORKDIR/playbooks/scenario.yml -e scenario=$1
+    echo "Preparing scenario $1 ... please wait."
+    if [ "x$ansible_params" == "x-vv" ]; then
+        $ansible_playbook $WORKDIR/playbooks/scenario.yml -e scenario=$1
+        ansible_run_ecode=$?
+    else
+        $ansible_playbook $WORKDIR/playbooks/scenario.yml -e scenario=$1 > /dev/null
+        ansible_run_ecode=$?
+    fi
 
-    echo
-    echo
-    [ -e $WORKSHOP_MESSAGE_FILE ] && cat $WORKSHOP_MESSAGE_FILE
-    echo
-    echo
+    if [ $ansible_run_ecode -eq 0 ]; then
+        echo "Scenario $1 is ready."
+    else
+        echo "Scenario has failed!" >&2
+        exit 3
+    fi
+
+    if [ -e $WORKSHOP_MESSAGE_FILE ]; then
+        echo
+        echo
+        cat $WORKSHOP_MESSAGE_FILE
+        echo
+        echo
+    fi
 }
 
 
