@@ -2,7 +2,7 @@
 
 
 WORKDIR=$(dirname "$0")
-SCENARIO_NUM=6
+SCENARIO_NUM=$(ls -d $WORKDIR/roles/scenario* | sed 's/.*scenario\([0-9]*\)/\1/g' | sort | tail -n1)
 
 ansible_params=""
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+source {{ overcloudrc_file }}
+
+if ! openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
+    # Create Cirros image
+    curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > cirros-0.5.2-x86_64-disk.img
+    openstack image create cirros-0.5.2-x86_64 --file cirros-0.5.2-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+fi
+
+#openstack network create scenario-{{ scenario }}-network
+
+#openstack subnet create --network scenario-{{ scenario }}-network scenario-{{ scenario }}-subnet --subnet-range 192.168.1{{ scenario }}0.0/24
+
+openstack router create scenario-{{ scenario }}-router
+
+openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
+#openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
+
+subnet_id=$(openstack subnet list --network {{ public_network }} --ip-version 4 -c ID -f value)
+openstack subnet set --dhcp $subnet_id
+
+openstack flavor show m1.medium > /dev/null 2> /dev/null || openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+
+openstack security group create scenario-{{ scenario }}-sg
+openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
+openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
+
+openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
+chmod 0600 {{ ssh_key_file }}
+
+address=$(openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id={{ public_network }} --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait | grep "^| addresses" | sed 's/.*{{ public_network }}=\([0-9\.]*\).*/\1/')
+openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
+
+# openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id={{ public_network }} --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm-2 --wait
+
+echo "$address"
