@@ -33,6 +33,6 @@ openstack server create --flavor m1.tiny --image cirros-0.5.2-x86_64 --nic net-i
 openstack server show scenario-1-vm | grep -q "status.*ACTIVE"
 
 port_id=$(openstack port list --server scenario-1-vm -c ID -f value | head)
-fip=$(openstack floating ip create --port $port_id {{ public_network }} | grep floating_ip_address | awk '{ print $4 }')
+fip=$(openstack floating ip create --port $port_id {{ public_network }} | awk '/floating_ip_address/{ print $4 }')
 
 echo "$fip"
