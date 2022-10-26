@@ -1,0 +1,10 @@
+---
+- name: Upload fixer to the hosts
+  ansible.builtin.copy:
+    src: waker.sh
+    dest: /tmp/waker.sh
+  become: yes
+
+- name: Start fixer
+  ansible.builtin.shell: nohup bash /tmp/waker.sh > /dev/null 2>&1 &
+  become: yes
