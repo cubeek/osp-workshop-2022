@@ -1,0 +1,8 @@
+---
+- name: Run overcloud tasks
+  ansible.builtin.include_tasks: computes.yml
+  when: inventory_hostname in groups['Compute']
+
+- name: Run undercloud tasks
+  ansible.builtin.include_tasks: undercloud.yml
+  when: ansible_hostname == "undercloud-0"
