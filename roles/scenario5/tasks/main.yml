@@ -1,8 +1,4 @@
 ---
-- name: Run overcloud tasks
-  ansible.builtin.include_tasks: compute-0.yml
-  when: ansible_hostname == "compute-0"
-
 - name: Run undercloud tasks
   ansible.builtin.include_tasks: undercloud.yml
   when: ansible_hostname == "undercloud-0"
