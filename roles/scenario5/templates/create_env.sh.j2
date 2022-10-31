@@ -25,6 +25,7 @@ openstack router set --enable-snat --external-gateway {{ public_network }} scena
 openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
 
 openstack flavor show m1.tiny > /dev/null 2> /dev/null || openstack flavor create m1.tiny --disk 1 --vcpus 1 --ram 64
+openstack flavor show m1.medium > /dev/null 2> /dev/null || openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
 
 openstack security group create scenario-{{ scenario }}-sg
 openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
