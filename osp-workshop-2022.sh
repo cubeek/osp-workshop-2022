@@ -44,6 +44,7 @@ EOF
 
 function do_snapshot() {
     check_and_get_inventory
+    set -e
 
     $ansible_playbook $WORKDIR/playbooks/snapshot.yml -e backup_name=$backup_name -e snapshot_action=$1
 
