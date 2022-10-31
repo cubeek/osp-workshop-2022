@@ -1,4 +1,3 @@
 ---
-simple_snapshot_url: https://gist.githubusercontent.com/sathlan/055991c399ab035158c16c2dcbebf52f/raw/71c04ee4b59da9e69d317a12f4012b8831d6b7c8/simple-snapshot.sh
 simple_snapshot_exec: simple-snapshot.sh
 downloads_dir: downloads

@@ -5,9 +5,8 @@
     state: directory
     mode: '0755'
 
-- name: "download simple snapshot script from {{ simple_snapshot_url }}"
-  ansible.builtin.get_url:
-    url: "{{ simple_snapshot_url }}"
+- name: create simple snapshot script
+  ansible.builtin.copy:
+    src: "{{ simple_snapshot_exec }}"
     dest: "{{ workdir }}/{{ downloads_dir }}/{{ simple_snapshot_exec }}"
     mode: '0755'
-    checksum: md5:012e455c4bd272057c5e6031bffa746c
