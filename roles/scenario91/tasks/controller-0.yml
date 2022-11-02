@@ -1,0 +1,8 @@
+---
+
+- name: Removing FIP from vips OVN NB DB
+  shell: |
+    lb_uuid=$(sudo podman exec ovn_cluster_north_db_server ovn-nbctl --no-leader-only find load_balancer 'external_ids:"neutron:vip_fip"="10.0.0.199"' | awk '/_uuid/{ print $ 3}')
+    vips=$(sudo podman exec -it -uroot ovn_cluster_north_db_server ovn-nbctl --no-leader-only find load_balancer 'external_ids:"neutron:vip_fip"="10.0.0.199"' | awk '/vips/{ print "{"$4}')
+    sudo podman exec ovn_cluster_north_db_server ovn-nbctl --no-leader-only set load_balancer $lb_uuid vip="$vips"
+  become: yes

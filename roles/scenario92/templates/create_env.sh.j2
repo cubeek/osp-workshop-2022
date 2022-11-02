@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -e
+
+source {{ overcloudrc_file }}
+
+if ! openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
+    openstack network create --external --provider-network-type flat --provider-physical-network datacentre {{ public_network }}
+    openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
+fi
+
+if ! openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
+    # Create Cirros image
+    curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > cirros-0.5.2-x86_64-disk.img
+    openstack image create cirros-0.5.2-x86_64 --file cirros-0.5.2-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+fi
+
+openstack network create scenario-{{ scenario }}-network
+
+openstack subnet create --network scenario-{{ scenario }}-network scenario-{{ scenario }}-subnet --subnet-range 192.168.100.0/24
+
+openstack router create scenario-{{ scenario }}-router
+
+openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
+openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
+
+openstack flavor show m1.small > /dev/null 2> /dev/null || openstack flavor create m1.small --disk 1 --vcpus 1 --ram 512
+
+openstack security group create scenario-{{ scenario }}-sg
+openstack security group rule create --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
+
+openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
+chmod 0600 {{ ssh_key_file }}
+
+openstack server create --flavor m1.small --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm1 --wait
+openstack server show scenario-{{ scenario }}-vm1 | grep -q "status.*ACTIVE"
+openstack server create --flavor m1.small --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm2 --wait
+openstack server show scenario-{{ scenario }}-vm2 | grep -q "status.*ACTIVE"
+IPVM1=$(openstack port list --server scenario-{{ scenario }}-vm1 -f json | grep ip_address | cut -d":" -f2 | sed 's/"//g')
+IPVM2=$(openstack port list --server scenario-{{ scenario }}-vm2 -f json | grep ip_address | cut -d":" -f2 | sed 's/"//g')
+
+openstack loadbalancer create --name scenario-{{ scenario }}-lb --vip-subnet-id {{ public_network }}_subnet --provider ovn
+openstack loadbalancer listener create --name scenario-{{ scenario }}-listener --protocol TCP --protocol-port 22 scenario-{{ scenario }}-lb
+openstack loadbalancer pool create --name scenario-{{ scenario }}-pool --protocol TCP  --listener scenario-{{ scenario }}-listener --lb-algorithm SOURCE_IP_PORT
+openstack loadbalancer member create --name scenario-{{ scenario }}-vm1 --address $IPVM1 --protocol-port 22 --subnet-id scenario-{{ scenario }}-subnet scenario-{{ scenario }}-pool
+openstack loadbalancer member create --name scenario-{{ scenario }}-vm2 --address $IPVM2 --protocol-port 22 --subnet-id scenario-{{ scenario }}-subnet scenario-{{ scenario }}-pool
+VIP=$(openstack loadbalancer show scenario-{{ scenario }}-lb -c vip_address -f value)
+
+openstack router unset --external-gateway scenario-{{ scenario }}-router
+openstack router set --external-gateway {{ public_network }} scenario-{{ scenario }}-router
+
+echo "$VIP"
