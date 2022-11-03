@@ -1,9 +1,9 @@
-- name: "Create scenario {{ scenario }}"
-  hosts: all
-  roles:
-    - "scenario{{ scenario }}"
-
 - name: Upload workaround for dying VMs
   hosts: Compute
   roles:
     - fixer
+
+- name: "Create scenario {{ scenario }}"
+  hosts: all
+  roles:
+    - "scenario{{ scenario }}"
