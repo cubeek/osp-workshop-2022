@@ -1,0 +1,29 @@
+Short descriptions of each scenario:
+
+Scenario 1
+Root cause: Security groups not allowing SSH and ICMP
+
+Scenario 2
+Root cause: Bad instance image
+
+Scenario 3
+Root cause: OVN controller doesn’t claim the port (bad OVN)
+
+Scenario 4
+Root cause: Missing ovnmeta- port in Neutron
+
+Scenario 5
+Root cause: Small flavor (similar symptom to scenario 2)
+
+Scenario 6
+Root cause: DHCP disabled
+
+Scenario 7
+Root cause: Stale port with duplicated IP or duplicated fip - RHBZ 2122791
+
+Scenario 8
+Root cause: Change ofport in table 65 - RHBZ 1908391
+
+Scenario 9
+Root cause: Missing bridge mappings on the host
+
