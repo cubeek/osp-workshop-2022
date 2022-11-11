@@ -9,12 +9,19 @@
   ansible.builtin.shell: rpm -q crudini || rpm -Uvh /tmp/{{ crudini_rpm }}
   become: yes
 
+- name: get qemu virt_type
+  ansible.builtin.shell: crudini --get /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf libvirt virt_type
+  become: yes
+  register: virt_type
+
 - name: set qemu virt_type
   ansible.builtin.shell: crudini --set /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf libvirt virt_type qemu
   become: yes
+  when: virt_type.stdout != "qemu"
 
 - name: restart nova compute
   ansible.builtin.systemd:
     state: restarted
     name: tripleo_nova_compute.service
   become: yes
+  when: virt_type.stdout != "qemu"
