@@ -22,6 +22,12 @@ function check_and_get_inventory() {
             pass_key=""
         fi
 
+        ssh $pass_key $undercloud ls $remote_inventory_file > /dev/null 2> /dev/null
+
+        if [ $? -ne 0 ]; then
+            ssh $pass_key $undercloud "source stackrc && /usr/bin/tripleo-ansible-inventory --static-yaml-inventory $remote_inventory_file" > /dev/null 2> /dev/null
+        fi
+
         scp $pass_key $undercloud:$remote_inventory_file $inventory_file
 
         # Fix stupid TripleO
