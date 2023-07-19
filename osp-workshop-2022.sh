@@ -82,9 +82,11 @@ function prepare_scenario() {
 
     echo "Preparing scenario $1 ... please wait."
     if [ "x$ansible_params" == "x-vv" ]; then
+        $ansible_playbook $WORKDIR/playbooks/workarounds.yml
         $ansible_playbook $WORKDIR/playbooks/scenario.yml -e scenario=$1
         ansible_run_ecode=$?
     else
+        $ansible_playbook $WORKDIR/playbooks/workarounds.yml
         $ansible_playbook $WORKDIR/playbooks/scenario.yml -e scenario=$1 > /dev/null
         ansible_run_ecode=$?
     fi
