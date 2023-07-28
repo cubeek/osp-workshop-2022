@@ -1,4 +1,24 @@
 ---
-- name: Run undercloud tasks
-  ansible.builtin.include_tasks: undercloud.yml
-  when: ansible_hostname == "undercloud-0"
+- name: break environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: break_undercloud.yml
+    apply:
+      tags: break
+  when: inventory_hostname.startswith('undercloud')
+  tags: break
+
+- name: grade environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+  when: inventory_hostname.startswith('undercloud')
+  tags: grade
+
+- name: fix environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: fix_undercloud.yml
+    apply:
+      tags: fix
+  when: inventory_hostname.startswith('undercloud')
+  tags: fix
