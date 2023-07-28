@@ -22,3 +22,11 @@
       tags: fix
   when: inventory_hostname.startswith('undercloud')
   tags: fix
+
+- name: cleanup environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: cleanup_undercloud.yml
+    apply:
+      tags: cleanup
+  when: inventory_hostname.startswith('undercloud')
+  tags: cleanup
