@@ -1,0 +1,6 @@
+---
+- name: grade
+  ansible.builtin.shell: |
+    ssh_command=$(tail -n1 {{ workshop_message_file }})
+    user=$($ssh_command -o StrictHostKeyChecking=no whoami)
+    [ "$user" == "cirros" ]
