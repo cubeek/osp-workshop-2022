@@ -1,7 +1,10 @@
 ---
+- name: make sure this is OSP 17
+  shell: grep -q "Red Hat OpenStack Platform release 17\." cat /etc/rhosp-release
+  when: inventory_hostname.startswith('undercloud')
+
 - name: execute tasks on the undercloud
   include_tasks: break_undercloud.yml
-  when: inventory_hostname.startswith('undercloud')
 
 - name: execute tasks on compute node 0
   include_tasks: break_compute-0.yml
