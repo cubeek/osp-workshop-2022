@@ -16,7 +16,7 @@ if ! openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
 fi
 
 # Create bad image
-touch scenario-{{ scenario }}-image.img
+touch {{ working_dir }}/.scenario{{ scenario }}/scenario-{{ scenario }}-image.img
 openstack image create scenario-{{ scenario }}-image --file scenario-{{ scenario }}-image.img --disk-format qcow2 --container-format bare --public
 
 openstack network create scenario-{{ scenario }}-network
