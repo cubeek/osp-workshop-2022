@@ -2,16 +2,13 @@
   shell: |
     source {{ overcloudrc_file }}
 
-    port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value)
-    openstack floating ip list --port $port_id -c ID -f value | xargs openstack floating ip delete
-
     openstack server delete scenario-{{ scenario }}-vm
 
     openstack keypair delete scenario-{{ scenario }}-key
     rm -f {{ ssh_key_file }}
 
     openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
-    openstack router delete subnet scenario-{{ scenario }}-router
+    openstack router delete scenario-{{ scenario }}-router
 
     openstack security group delete scenario-{{ scenario }}-sg
 

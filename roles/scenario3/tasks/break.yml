@@ -1,6 +1,6 @@
 ---
 - name: make sure this is OSP 17
-  shell: grep -q "Red Hat OpenStack Platform release 17\." cat /etc/rhosp-release
+  shell: grep -q "Red Hat OpenStack Platform release 17\." /etc/rhosp-release
   when: inventory_hostname.startswith('undercloud')
 
 - name: execute tasks on the undercloud

@@ -12,7 +12,7 @@
     rm -f {{ ssh_key_file }}
 
     openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
-    openstack router delete subnet scenario-{{ scenario }}-router
+    openstack router delete scenario-{{ scenario }}-router
 
     openstack security group delete scenario-{{ scenario }}-sg
 
