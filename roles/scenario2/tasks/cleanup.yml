@@ -16,6 +16,7 @@
     openstack security group delete scenario-{{ scenario }}-sg
 
     openstack image delete scenario-{{ scenario }}-image
+    rm -f scenario-{{ scenario }}-image.img
 
     openstack network delete scenario-{{ scenario }}-network
 

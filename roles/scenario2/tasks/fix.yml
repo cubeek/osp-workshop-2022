@@ -5,9 +5,11 @@
 
     # Since the VM has already booted with bad image we have to re-create the
     # VM with the correct image
-    port_id=$(openstack port list --scenario-{{ scenario }}-vm -c ID -f value | head -n1)
-    fip=$()
+    fip=$(openstack floating ip list --port $(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c ID -f value)
+
     openstack server delete scenario-{{ scenario }}-vm
 
+    openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
 
-
+    port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
+    openstack floating ip set --port $port_id $fip
