@@ -1,0 +1,5 @@
+---
+- name: restart VM so it fetches again the metadata
+  shell: |
+    openstack server reboot --hard scenario-{{ scenario }}-vm --wait
+
