@@ -1,7 +1,7 @@
 ---
-- name: create scenario1 working directory
+- name: "create scenario {{ scenario}} working directory"
   ansible.builtin.file:
-    path: "{{ working_dir }}/.scenario1"
+    path: "{{ working_dir }}/.scenario{{ scenario }}"
     state: directory
 
 - name: Upload scenario to the undercloud
@@ -28,5 +28,5 @@
 - name: Create message
   ansible.builtin.copy:
     dest: "{{ workshop_message_file }}"
-    content: "Run the following command: \nssh -i {{ ssh_key_file }} cirros@{{ floating_ip.stdout_lines[-1] }}"
+    content: "Run the following command: \nssh -i {{ ssh_key_file }} cirros@{{ floating_ip.stdout_lines[-1] }}\n"
   delegate_to: 127.0.0.1

@@ -1,5 +1,5 @@
 ---
-- name: delete OpenStack resources for scenario1
+- name: "delete OpenStack resources for scenario {{ scenario }}"
   shell: |
     source {{ overcloudrc_file }}
 
@@ -18,7 +18,7 @@
 
     openstack network delete scenario-{{ scenario }}-network
 
-- name: delete scenario1 working directory
+- name: "delete scenario {{ scenario }} working directory"
   ansible.builtin.file:
-    path: "{{ working_dir }}/.scenario1"
+    path: "{{ working_dir }}/.scenario{{ scenario }}"
     state: absent

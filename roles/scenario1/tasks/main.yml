@@ -1,7 +1,7 @@
 ---
 - name: break environment - run undercloud tasks
   ansible.builtin.include_tasks:
-    file: break_undercloud.yml
+    file: break.yml
     apply:
       tags: break
   when: inventory_hostname.startswith('undercloud')
@@ -17,7 +17,7 @@
 
 - name: fix environment - run undercloud tasks
   ansible.builtin.include_tasks:
-    file: fix_undercloud.yml
+    file: fix.yml
     apply:
       tags: fix
   when: inventory_hostname.startswith('undercloud')
@@ -25,7 +25,7 @@
 
 - name: cleanup environment - run undercloud tasks
   ansible.builtin.include_tasks:
-    file: cleanup_undercloud.yml
+    file: cleanup.yml
     apply:
       tags: cleanup
   when: inventory_hostname.startswith('undercloud')
