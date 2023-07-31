@@ -1,8 +1,32 @@
 ---
-- name: Run overcloud tasks
-  ansible.builtin.include_tasks: compute-0.yml
-  when: ansible_hostname == "compute-0"
+- name: break environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: break.yml
+    apply:
+      tags: break
+  when: inventory_hostname.startswith('undercloud')
+  tags: break
 
-- name: Run undercloud tasks
-  ansible.builtin.include_tasks: undercloud.yml
-  when: ansible_hostname == "undercloud-0"
+- name: grade environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+  when: inventory_hostname.startswith('undercloud')
+  tags: grade
+
+- name: fix environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: fix.yml
+    apply:
+      tags: fix
+  when: inventory_hostname.startswith('undercloud')
+  tags: fix
+
+- name: cleanup environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: cleanup.yml
+    apply:
+      tags: cleanup
+  when: inventory_hostname.startswith('undercloud')
+  tags: cleanup

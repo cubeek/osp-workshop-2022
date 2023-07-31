@@ -1,0 +1,9 @@
+---
+- name: fix the scenario {{ scenario }}
+  become: yes
+  shell: |
+    podman stop ovn_controller
+    podman rm -f ovn_controller
+    paunch debug --file /var/lib/tripleo-config/container-startup-config/step_4/hashed-ovn_controller.json --container ovn_controller --action run
+    systemctl restart tripleo_ovn_controller
+  when: inventory_hostname == groups['Compute'][0]

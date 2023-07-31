@@ -33,7 +33,8 @@ openstack security group rule create --ingress --protocol tcp --dst-port 22 scen
 openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
 chmod 0600 {{ ssh_key_file }}
 
-openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:compute-0.redhat.local
+hypervisor=$(openstack hypervisor list -c "Hypervisor Hostname" -f value --matching {{ groups['Compute'][0] }})
+openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
 
 port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
 fip=$(openstack floating ip create --port $port_id {{ public_network }} | awk '/floating_ip_address/{ print $4 }')
