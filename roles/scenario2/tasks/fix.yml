@@ -1,0 +1,13 @@
+---
+- name: fix the scenario {{ scenario }}
+  shell: |
+    source {{ overcloudrc_file }}
+
+    # Since the VM has already booted with bad image we have to re-create the
+    # VM with the correct image
+    port_id=$(openstack port list --scenario-{{ scenario }}-vm -c ID -f value | head -n1)
+    fip=$()
+    openstack server delete scenario-{{ scenario }}-vm
+
+
+
