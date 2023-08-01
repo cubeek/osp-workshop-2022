@@ -1,0 +1,7 @@
+---
+- name: fix the scenario {{ scenario }}
+  shell: |
+    source {{ overcloudrc_file }}
+
+    openstack subnet set --dhcp $(openstack subnet list --network {{ public_network }} --ip-version 4 -c ID -f value | head -n1)
+    openstack server reboot --hard scenario-{{ scenario }}-vm

@@ -9,6 +9,8 @@ if ! openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
     openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
 fi
 
+openstack subnet set --no-dhcp $(openstack subnet list --network {{ public_network }} --ip-version 4 -c ID -f value | head -n1)
+
 if ! openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
     # Create Cirros image
     curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > cirros-0.5.2-x86_64-disk.img
