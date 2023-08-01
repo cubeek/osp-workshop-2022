@@ -8,7 +8,6 @@
     openstack server delete scenario-{{ scenario }}-vm
 
     openstack keypair delete scenario-{{ scenario }}-key
-    rm -f {{ ssh_key_file }}
 
     openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
     openstack router delete scenario-{{ scenario }}-router

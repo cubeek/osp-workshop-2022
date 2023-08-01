@@ -2,4 +2,4 @@
 overcloudrc_file: /home/stack/overcloudrc
 public_network: public
 create_env_file: /home/stack/create_env.sh
-ssh_key_file: "{{ working_dir }}/.scenario-{{ scenario }}-key.pem"
+ssh_key_file: "{{ working_dir }}/.scenario{{ scenario }}/scenario-{{ scenario }}-key.pem"
