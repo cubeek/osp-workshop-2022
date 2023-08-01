@@ -6,12 +6,7 @@
 
     openstack keypair delete scenario-{{ scenario }}-key
 
-    openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
-    openstack router delete scenario-{{ scenario }}-router
-
     openstack security group delete scenario-{{ scenario }}-sg
-
-    openstack network delete scenario-{{ scenario }}-network
 
 - name: "delete scenario {{ scenario }} working directory"
   ansible.builtin.file:
