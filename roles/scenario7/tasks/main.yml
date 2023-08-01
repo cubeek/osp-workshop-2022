@@ -1,32 +1,30 @@
 ---
-- name: Run undercloud tasks
-  ansible.builtin.include_tasks: undercloud.yml
-  when: ansible_hostname == "undercloud-0"
+- name: break environment - run tasks
+  ansible.builtin.include_tasks:
+    file: break.yml
+    apply:
+      tags: break
+  tags: break
 
-- name: Run overcloud tasks
-  ansible.builtin.include_tasks: controller-0.yml
-  when: ansible_hostname == "controller-0"
+- name: grade environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+  when: inventory_hostname.startswith('undercloud')
+  tags: grade
 
-- name: Cleanup ARP cache on nodes
-  ansible.builtin.shell: |
-    while true; do
-        ping {{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }} -c1
-        if [ $? -ne 0 ]; then
-            break;
-        fi
-        ip neigh del $(ip neigh | awk '/{{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }}/{ print $1 " " $2 " " $3}')
-    done
-  become: yes
+- name: fix environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: fix.yml
+    apply:
+      tags: fix
+  tags: fix
 
-- name: Cleanup ARP cache on hypervisor
-  ansible.builtin.shell: |
-    while true; do
-        ping {{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }} -c1
-        if [ $? -ne 0 ]; then
-            break;
-        fi
-        ip neigh del $(ip neigh | awk '/{{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }}/{ print $1 " " $2 " " $3}')
-    done
-  become: yes
-  delegate_to: 127.0.0.1
-  when: ansible_hostname == "undercloud-0"
+- name: cleanup environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: cleanup.yml
+    apply:
+      tags: cleanup
+  when: inventory_hostname.startswith('undercloud')
+  tags: cleanup

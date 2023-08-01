@@ -1,4 +1,9 @@
 ---
+- name: "create scenario {{ scenario}} working directory"
+  ansible.builtin.file:
+    path: "{{ working_dir }}/.scenario{{ scenario }}"
+    state: directory
+
 - name: Upload scenario to the undercloud
   ansible.builtin.template:
     src: create_env.sh.j2
@@ -8,6 +13,12 @@
 - name: Execute environment
   ansible.builtin.shell: "{{ create_env_file }}"
   register: floating_ip
+
+- name: "wait 300 seconds for {{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }} to become reachable"
+  ansible.builtin.wait_for:
+    port: 22
+    host: "{{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }}"
+    delay: 10
 
 - name: Delete environment file
   ansible.builtin.file:
@@ -23,5 +34,5 @@
 - name: Create message
   ansible.builtin.copy:
     dest: "{{ workshop_message_file }}"
-    content: "Run the following command: ssh -i {{ ssh_key_file }} cirros@{{ floating_ip.stdout_lines[-1] }}"
+    content: "Run the following command: \nssh -i {{ ssh_key_file }} cirros@{{ floating_ip.stdout_lines[-1] }}\n"
   delegate_to: 127.0.0.1

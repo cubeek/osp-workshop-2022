@@ -1,0 +1,24 @@
+---
+- name: find the floating ip
+  ansible.builtin.shell: |
+    source {{ overcloudrc_file }}
+
+    openstack port list --server scenario-{{ scenario }}-vm -c "Fixed IP Addresses" -f json | jq -r '.[0]["Fixed IP Addresses"][0].ip_address'
+  when: inventory_hostname == 'undercloud'
+  register: floating_ip
+
+- name: execute tasks on controller
+  ansible.builtin.shell: |
+    ovn_connection_string=$(ovs-vsctl get open . external_ids:ovn-remote | sed 's/6642/6641/' | tr -d '"')
+    router_uuid=$(podman exec ovn_controller ovn-nbctl --db=$ovn_connection_string find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
+    podman exec ovn_controller ovn-nbctl --db=$ovn_connection_string lr-nat-del $router_uuid dnat_and_snat {{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }} || :
+  when: inventory_hostname == groups['Controller'][0]
+  become: yes
+
+- name: cleanup ARP cache on nodes
+  ansible.builtin.shell: |
+    mac_data=$(ip neigh | awk '/{{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }}/{ print $1 " " $2 " " $3}')
+    if [ "x" != "x$mac_data" ]; then
+      ip neigh del $mac_data
+    fi
+  become: yes

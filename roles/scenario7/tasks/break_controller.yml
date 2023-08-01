@@ -1,0 +1,16 @@
+---
+
+- name: Run some things
+  shell: |
+    if grep -q "17\." /etc/rhosp-release; then
+      router_uuid=$(podman exec ovn_cluster_north_db_server ovn-nbctl --no-leader find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
+      podman exec ovn_cluster_north_db_server ovn-nbctl --no-leader lr-nat-add $router_uuid dnat_and_snat {{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }} 192.168.1{{ scenario }}0.4
+    elif grep -q "16\." /etc/rhosp-release; then
+      ovn_connection_string=$(ovs-vsctl get open . external_ids:ovn-remote | sed 's/6642/6641/' | tr -d '"')
+      router_uuid=$(podman exec ovn_controller ovn-nbctl --db=$ovn_connection_string find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
+      podman exec ovn_controller ovn-nbctl --db=$ovn_connection_string lr-nat-add $router_uuid dnat_and_snat {{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }} 192.168.1{{ scenario }}0.4
+      lrp=$(podman exec ovn_controller ovn-nbctl --db=$ovn_connection_string lrp-list $router_uuid | awk '{ print $1 }')
+      podman exec ovn_controller ovn-nbctl --db=$ovn_connection_string get logical_router_port $lrp mac | tr -d '"'
+    fi
+  become: yes
+  register: lrp_mac
