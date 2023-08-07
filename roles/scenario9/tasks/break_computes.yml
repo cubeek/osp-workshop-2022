@@ -1,0 +1,7 @@
+---
+
+- name: modify things
+  ansible.builtin.shell: |
+    ovs-vsctl get open . external_ids:ovn-bridge-mappings > ~/.bms.txt
+    ovs-vsctl remove open . external_ids ovn-bridge-mappings
+  become: yes

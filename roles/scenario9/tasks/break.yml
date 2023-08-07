@@ -1,0 +1,8 @@
+---
+- name: execute tasks on compute nodes
+  include_tasks: break_computes.yml
+  when: inventory_hostname in groups['Compute']
+
+- name: execute tasks on the undercloud
+  include_tasks: break_undercloud.yml
+  when: inventory_hostname.startswith('undercloud')

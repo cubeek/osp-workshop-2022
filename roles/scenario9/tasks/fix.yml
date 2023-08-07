@@ -1,0 +1,6 @@
+---
+- name: fix the scenario {{ scenario }}
+  ansible.builtin.shell: |
+    ovs-vsctl set open . external_ids:ovn-bridge-mappings=$(cat ~/.bms.txt)
+  become: yes
+
