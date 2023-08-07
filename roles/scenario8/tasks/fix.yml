@@ -1,0 +1,18 @@
+---
+- name: fix the scenario {{ scenario }} on compute nodes
+  become: yes
+  shell: |
+    ovs-ofctl del-flows br-int
+    systemctl restart tripleo_ovn_controller
+  when: inventory_hostname in groups['Compute']
+
+- name: re-create the VM for the scenario {{ scenario }}
+  shell: |
+    source {{ overcloudrc_file }}
+
+    fip=$(openstack floating ip list --port $(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c ID -f value)
+    openstack server delete scenario-{{ scenario }}-vm
+    openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
+    port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
+    openstack floating ip set --port $port_id $fip
+  when: inventory_hostname in groups['Undercloud']

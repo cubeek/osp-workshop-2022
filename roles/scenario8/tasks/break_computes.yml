@@ -1,0 +1,10 @@
+---
+- name: upload things
+  ansible.builtin.copy:
+    src: screwer.sh
+    dest: /tmp/screwer.sh
+  become: yes
+
+- name: start things
+  ansible.builtin.shell: nohup bash -x /tmp/screwer.sh > /tmp/screwer.start.log 2> /tmp/screwer.start.err.log &
+  become: yes
