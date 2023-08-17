@@ -10,9 +10,18 @@
   shell: |
     source {{ overcloudrc_file }}
 
-    fip=$(openstack floating ip list --port $(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c ID -f value)
+    fip=$(openstack floating ip list --port $(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c "Floating IP Address" -f value)
     openstack server delete scenario-{{ scenario }}-vm
     openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
     port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
     openstack floating ip set --port $port_id $fip
+    echo $fip
+  when: inventory_hostname in groups['Undercloud']
+  register: fip
+
+- name: wait for the VM to come up
+  wait_for:
+    host={{ fip.stdout_lines[-1] }}
+    port=22
+    delay=10
   when: inventory_hostname in groups['Undercloud']
