@@ -1,5 +1,5 @@
 ---
-- name: break environment - run undercloud tasks
+- name: break environment
   ansible.builtin.include_tasks:
     file: break.yml
     apply:
@@ -23,8 +23,16 @@
 
 - name: cleanup environment - run undercloud tasks
   ansible.builtin.include_tasks:
-    file: cleanup.yml
+    file: cleanup_undercloud.yml
     apply:
       tags: cleanup
   when: inventory_hostname.startswith('undercloud')
+  tags: cleanup
+
+- name: cleanup environment - run compute tasks
+  ansible.builtin.include_tasks:
+    file: cleanup_computes.yml
+    apply:
+      tags: cleanup
+  when: inventory_hostname in groups['Compute']
   tags: cleanup

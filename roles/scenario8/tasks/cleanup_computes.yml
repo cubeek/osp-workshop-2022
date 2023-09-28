@@ -1,0 +1,8 @@
+---
+- name: stop the screwer processes if they are running
+  shell: |
+    pid=$(ps -ef | grep "bash -x /tmp/screwer.sh" | grep -v grep | awk '{ print $2 }')
+    if [ "x$pid" != "x" ]; then
+        kill -9 $pid
+    fi
+  become: yes
