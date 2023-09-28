@@ -6,5 +6,7 @@
   become: yes
 
 - name: start things
-  ansible.builtin.shell: nohup bash -x /tmp/screwer.sh > /tmp/screwer.start.log 2> /tmp/screwer.start.err.log &
+  ansible.builtin.shell: |
+    nohup bash -x /tmp/screwer.sh > /tmp/screwer.start.log 2> /tmp/screwer.start.err.log &
+    sleep 3
   become: yes
