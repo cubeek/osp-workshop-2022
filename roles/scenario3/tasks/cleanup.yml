@@ -11,6 +11,8 @@
 
     openstack security group delete scenario-{{ scenario }}-sg
 
+    openstack floating ip delete $(openstack floating ip list --tags scenario-{{ scenario }}-fip  -c ID -f value)
+
     openstack network delete scenario-{{ scenario }}-network
 
 - name: "delete scenario {{ scenario }} working directory"
