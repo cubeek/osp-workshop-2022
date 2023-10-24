@@ -16,7 +16,7 @@
 
 - name: Install things
   become: yes
-  shell:
+  shell: |
     ovs-vsctl remove open . external_ids ovn-match-northd-version
     podman exec ovn_controller rpm -Uvh --oldpackage /tmp/{{ ovn_package }} /tmp/{{ ovn_host_package }}
 
