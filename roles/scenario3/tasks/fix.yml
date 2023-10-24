@@ -1,4 +1,10 @@
 ---
+- name: delete bad ovn controller container
+  shell: |
+    podman stop ovn_controller
+    podman rm -f ovn_controller
+  become: yes
+
 - set_fact:
     tripleo_container_manage_config_id: "tripleo_step4"
     tripleo_container_manage_config_patterns: "ovn_controller.json"
@@ -8,9 +14,11 @@
     tripleo_container_manage_healthcheck_disabled: true
   when: "inventory_hostname == groups['Compute'][0]"
 
-- name: fix the scenario {{ scenario }}
+- name: re-create ovn-controller container
   include_role:
-      name: tripleo_container_manage
+    name: tripleo_container_manage
+    apply:
+      become: yes
   when: "inventory_hostname == groups['Compute'][0]"
 
 - name: re-create the VM for the scenario {{ scenario }}
