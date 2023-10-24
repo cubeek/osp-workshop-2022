@@ -1,9 +1,15 @@
 ---
+---
+- set_fact:
+    tripleo_container_manage_config_id: "tripleo_step4"
+    tripleo_container_manage_config_patterns: "ovn_controller.json"
+    tripleo_container_manage_clean_orphans: false
+    tripleo_container_manage_config: "/var/lib/tripleo-config/container-startup-config/step_4"
+    tripleo_container_manage_debug: true
+    tripleo_container_manage_healthcheck_disabled: true
+  when: "inventory_hostname == groups['Compute'][0]"
+
 - name: fix the scenario {{ scenario }}
-  become: yes
-  shell: |
-    podman stop ovn_controller
-    podman rm -f ovn_controller
-    paunch debug --file /var/lib/tripleo-config/container-startup-config/step_4/hashed-ovn_controller.json --container ovn_controller --action run || :
-    systemctl restart tripleo_ovn_controller
-  when: inventory_hostname == groups['Compute'][0]
+  include_role:
+      name: tripleo_container_manage
+  when: "inventory_hostname == groups['Compute'][0]"
