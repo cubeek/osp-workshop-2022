@@ -1,5 +1,4 @@
 ---
----
 - set_fact:
     tripleo_container_manage_config_id: "tripleo_step4"
     tripleo_container_manage_config_patterns: "ovn_controller.json"
