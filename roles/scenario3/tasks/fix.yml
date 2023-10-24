@@ -1,43 +1,43 @@
 ---
-- name: delete bad ovn controller container
-  shell: |
-    podman stop ovn_controller
-    podman rm -f ovn_controller
-  become: yes
+- block:
+  - name: delete bad ovn controller container
+    shell: |
+      podman stop ovn_controller
+      podman rm -f ovn_controller
+    become: yes
 
-- set_fact:
-    tripleo_container_manage_config_id: "tripleo_step4"
-    tripleo_container_manage_config_patterns: "ovn_controller.json"
-    tripleo_container_manage_clean_orphans: false
-    tripleo_container_manage_config: "/var/lib/tripleo-config/container-startup-config/step_4"
-    tripleo_container_manage_debug: true
-    tripleo_container_manage_healthcheck_disabled: true
+  - set_fact:
+      tripleo_container_manage_config_id: "tripleo_step4"
+      tripleo_container_manage_config_patterns: "ovn_controller.json"
+      tripleo_container_manage_clean_orphans: false
+      tripleo_container_manage_config: "/var/lib/tripleo-config/container-startup-config/step_4"
+      tripleo_container_manage_debug: true
+      tripleo_container_manage_healthcheck_disabled: true
+
+  - name: re-create ovn-controller container
+    include_role:
+      name: tripleo_container_manage
+      apply:
+        become: yes
   when: "inventory_hostname == groups['Compute'][0]"
 
-- name: re-create ovn-controller container
-  include_role:
-    name: tripleo_container_manage
-    apply:
-      become: yes
-  when: "inventory_hostname == groups['Compute'][0]"
+- block:
+  - name: re-create the VM for the scenario {{ scenario }}
+    shell: |
+      source {{ overcloudrc_file }}
 
-- name: re-create the VM for the scenario {{ scenario }}
-  shell: |
-    source {{ overcloudrc_file }}
+      openstack server delete scenario-{{ scenario }}-vm
+      hypervisor=$(openstack hypervisor list -c "Hypervisor Hostname" -f value --matching {{ groups['Compute'][0] }})
+      openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
+      port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
+      fip=$(openstack floating ip list --tags scenario-{{ scenario }}-fip  -c ID -f value)
+      openstack floating ip set --port $port_id $fip
+      echo $fip
+    register: fip
 
-    fip=$(openstack floating ip list --port $(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c "Floating IP Address" -f value)
-    openstack server delete scenario-{{ scenario }}-vm
-    hypervisor=$(openstack hypervisor list -c "Hypervisor Hostname" -f value --matching {{ groups['Compute'][0] }})
-    openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
-    port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
-    openstack floating ip set --port $port_id $fip
-    echo $fip
-  when: inventory_hostname in groups['Undercloud']
-  register: fip
-
-- name: wait for the VM to come up
-  wait_for:
-    host={{ fip.stdout_lines[-1] }}
-    port=22
-    delay=10
+  - name: wait for the VM to come up
+    wait_for:
+      host={{ fip.stdout_lines[-1] }}
+      port=22
+      delay=10
   when: inventory_hostname in groups['Undercloud']
