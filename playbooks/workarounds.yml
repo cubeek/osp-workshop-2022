@@ -1,4 +1,4 @@
 - name: Upload workaround for dying VMs
-  hosts: Compute
+  hosts: "{{ compute_group_name }}"
   roles:
     - fixer

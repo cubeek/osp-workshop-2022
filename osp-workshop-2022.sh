@@ -4,6 +4,7 @@
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
 undercloud=stack@undercloud-0
 remote_inventory_file=/home/stack/overcloud-deploy/overcloud/tripleo-ansible-inventory.yaml
+compute_hosts_group_name=Compute
 
 function check_and_get_inventory() {
     if [ ! -e $inventory_file ]; then
