@@ -56,6 +56,7 @@ OPTIONS:
   -f VALUE        relative path to tripleo ansible inventory file on the remote undercloud host (default: $remote_inventory_file)
   -p VALUE        private key to use for the ssh connection to the undercloud (default: user SSH key)
   -u VALUE        undercloud user and host (default: $undercloud)
+  -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
   -h              display help
 
 NOTE: ACTION must be the last argument!
@@ -65,7 +66,7 @@ EOF
 }
 
 
-while getopts "b:df:i:p:u:h" opt_key; do
+while getopts "b:dKf:i:p:u:h" opt_key; do
    case "$opt_key" in
        b)
            backup_name=$OPTARG
@@ -84,6 +85,9 @@ while getopts "b:df:i:p:u:h" opt_key; do
            ;;
        u)
            undercloud=$OPTARG
+           ;;
+       K)
+           ansible_params="$ansible_params --ask-become-pass"
            ;;
        h|*)
            usage

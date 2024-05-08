@@ -25,11 +25,11 @@ OPTIONS:
   -d              turn on debug for ansible
   -i VALUE        relative path to local inventory file (default: $inventory_file)
   -p VALUE        private key to use for the ssh connection to the edpm nodes (default: user SSH key)
-  -k VALUE        absolute path to the kubeconfig file (default: $kubeconfig_file)
+  -c VALUE        absolute path to the kubeconfig file (default: $kubeconfig_file)
   -o VALUE        absolute path to the oc binary (default: oc needs to be in the one of the locations from the PATH variable)
   -n VALUE        name of the OpenShift namespace where RHOSO is installed (default: $oc_namespace)
   -f VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $inventory_secret_name)
-  
+  -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
   -h              display help
 
 NOTE: ACTION must be the last argument!
@@ -52,13 +52,13 @@ EOF
     fi
 }
 
-while getopts "b:df:i:p:k:o:u:n:f" opt_key; do
-   case "$opt_key" in
+while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
+    case "$opt_key" in
        b)
            backup_name=$OPTARG
            ;;
        d)
-           ansible_params="$ansible_params -vv"
+           ansible_params="$ansible_params -vvvv"
            ;;
        f)
            inventory_secret_name=$OPTARG
@@ -70,7 +70,7 @@ while getopts "b:df:i:p:k:o:u:n:f" opt_key; do
            private_key=$OPTARG
            ansible_params="$ansible_params --private-key $private_key"
            ;;
-       k)
+       c)
            kubeconfig_file=$OPTARG
            ;;
        o)
@@ -78,6 +78,9 @@ while getopts "b:df:i:p:k:o:u:n:f" opt_key; do
            ;;
        n)
            oc_namespace=$OPTARG
+           ;;
+       K)
+           ansible_params="$ansible_params --ask-become-pass"
            ;;
        h|*)
            usage
