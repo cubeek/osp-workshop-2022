@@ -96,7 +96,7 @@ while getopts "b:dKf:i:p:u:h" opt_key; do
 done
 
 # This needs to be defined aftar parsing parameters because of variables passed
-ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e installer=tripleo -e workdir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
+ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e installer=tripleo -e working_dir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
 
 shift $((OPTIND-1))
 

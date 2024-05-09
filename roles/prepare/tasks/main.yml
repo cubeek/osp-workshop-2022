@@ -1,12 +1,12 @@
 ---
-- name: "create {{ downloads_dir }} in the {{ workdir }} directory"
+- name: "create {{ downloads_dir }} in the {{ working_dir }} directory"
   ansible.builtin.file:
-    path: "{{ workdir }}/{{ downloads_dir }}"
+    path: "{{ working_dir }}/{{ downloads_dir }}"
     state: directory
     mode: '0755'
 
 - name: create simple snapshot script
   ansible.builtin.copy:
     src: "{{ simple_snapshot_exec }}"
-    dest: "{{ workdir }}/{{ downloads_dir }}/{{ simple_snapshot_exec }}"
+    dest: "{{ working_dir }}/{{ downloads_dir }}/{{ simple_snapshot_exec }}"
     mode: '0755'
