@@ -15,7 +15,9 @@
 
     {{ oc_cmd }} openstack security group delete scenario-{{ scenario }}-sg
 
-    {{ oc_cmd }} openstack network delete scenario-{{ scenario }}-network
+    for net in $({{ oc_cmd }} openstack network list | grep scenario-{{ scenario }}-network | awk '{ print $2 }'); do
+      {{ oc_cmd }} openstack network delete $net
+    done
 
 - name: "delete scenario {{ scenario }} working directory"
   ansible.builtin.file:
