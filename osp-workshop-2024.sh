@@ -2,7 +2,9 @@
 
 source ./osp-workshop-common.sh
 
-inventory_file=$WORKDIR/edpm-inventory.yaml
+DATADIR="$WORKDIR/.data"
+
+inventory_file=$DATADIR/edpm-inventory.yaml
 kubeconfig_file=$HOME/.kube/config
 oc_bin=oc
 oc_namespace=openstack
@@ -40,7 +42,10 @@ EOF
 
 function check_and_get_inventory() {
     if [ ! -e $inventory_file ]; then
-        $oc_bin -n $oc_namespace get secret $inventory_secret_name -o json | jq '.data | map_values(@base64d)' | jq -r '.inventory' > $inventory_file
+        if [ ! -d $DATADIR ]; then
+            mkdir -p $DATADIR
+        fi
+        $oc_bin --kubeconfig $kubeconfig_file -n $oc_namespace get secret $inventory_secret_name -o json | jq '.data | map_values(@base64d)' | jq -r '.inventory' > $inventory_file
         if [ $? -ne 0 ]; then
             echo
             cat << EOF
@@ -90,7 +95,7 @@ while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
 done
 
 # This needs to be defined aftar parsing parameters because of variables passed
-ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e compute_group_name=$compute_hosts_group_name -e installer=podified -e working_dir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE -e oc_bin=$oc_bin -e oc_namespace=$oc_namespace -e create_env_file=$WORKDIR/create_env.sh"
+ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e compute_group_name=$compute_hosts_group_name -e installer=podified -e working_dir=$DATADIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE -e oc_bin=$oc_bin -e oc_namespace=$oc_namespace -e create_env_file=$DATADIR/create_env.sh"
 
 shift $((OPTIND-1))
 
