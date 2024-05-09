@@ -4,7 +4,7 @@
     path: "{{ working_dir }}/.scenario{{ scenario }}"
     state: directory
 
-- name: Upload scenario to the undercloud
+- name: Upload scenario
   ansible.builtin.template:
     src: create_env.sh.j2
     dest: "{{ create_env_file }}"

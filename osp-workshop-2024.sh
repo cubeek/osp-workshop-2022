@@ -90,7 +90,7 @@ while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
 done
 
 # This needs to be defined aftar parsing parameters because of variables passed
-ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e compute_group_name=$compute_hosts_group_name -e installer=podified -e working_dir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
+ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e compute_group_name=$compute_hosts_group_name -e installer=podified -e working_dir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE -e oc_bin=$oc_bin -e oc_namespace=$oc_namespace -e create_env_file=$WORKDIR/create_env.sh"
 
 shift $((OPTIND-1))
 

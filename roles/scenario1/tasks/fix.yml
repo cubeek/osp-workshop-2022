@@ -1,5 +1,6 @@
 ---
 - name: fix the scenario {{ scenario }}
   shell: |
-    source {{ overcloudrc_file }}
-    openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
+    {{ osp_get_credentials_cmd }}
+
+    {{oc_cmd }} openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
