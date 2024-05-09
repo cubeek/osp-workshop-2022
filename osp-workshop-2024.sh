@@ -100,7 +100,18 @@ while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
 done
 
 # This needs to be defined aftar parsing parameters because of variables passed
-ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e compute_group_name=$compute_hosts_group_name -e installer=podified -e working_dir=$DATADIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE -e oc_bin=$oc_bin -e oc_namespace=$oc_namespace -e create_env_file=$DATADIR/create_env.sh"
+ansible_playbook="ansible-playbook $ansible_params \
+    -i $inventory_file \
+    -e compute_group_name=$compute_hosts_group_name \
+    -e installer=podified \
+    -e working_dir=$DATADIR \
+    -e workshop_message_file=$WORKSHOP_MESSAGE_FILE \
+    -e oc_bin=$oc_bin \
+    -e oc_namespace=$oc_namespace \
+    -e create_env_file=$DATADIR/create_env.sh \
+    -e image_name=cirros-0.6.2 \
+    -e image_file_name=cirros-0.6.2-x86_64.img \
+    -e image_url=https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img"
 
 shift $((OPTIND-1))
 

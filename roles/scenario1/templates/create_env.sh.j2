@@ -10,10 +10,10 @@ if ! $OC_COMMAND openstack network show {{ public_network }} > /dev/null 2> /dev
     $OC_COMMAND openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
 fi
 
-if ! $OC_COMMAND openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
+if ! $OC_COMMAND openstack image show {{ image_name }} > /dev/null 2> /dev/null; then
     # Create Cirros image
-    curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > cirros-0.5.2-x86_64-disk.img
-    $OC_COMMAND openstack image create cirros-0.5.2-x86_64 --disk-format qcow2 --container-format bare --public < cirros-0.5.2-x86_64-disk.img 
+    curl -L {{ image_url }} > {{ image_file_name }}
+    $OC_COMMAND openstack image create {{ image_name }} --disk-format qcow2 --container-format bare --public < {{ image_file_name }}
 fi
 
 $OC_COMMAND openstack network create scenario-{{ scenario }}-network
@@ -32,7 +32,7 @@ $OC_COMMAND openstack security group create scenario-{{ scenario }}-sg
 $OC_COMMAND openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
 chmod 0600 {{ ssh_key_file }}
 
-$OC_COMMAND openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
+$OC_COMMAND openstack server create --flavor m1.medium --image {{ image_name }} --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
 $OC_COMMAND openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
 
 port_id=$($OC_COMMAND openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
