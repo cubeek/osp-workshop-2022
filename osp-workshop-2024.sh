@@ -68,7 +68,7 @@ while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
            backup_name=$OPTARG
            ;;
        d)
-           ansible_params="$ansible_params -vvvv"
+           ansible_params="$ansible_params -vv"
            debug=true
            ;;
        f)
