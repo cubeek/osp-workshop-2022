@@ -54,6 +54,11 @@ there is proper $kubeconfig_file provided and that OpenStack DataPlane is instal
 EOF
             exit 1
         fi
+        # Now lets remove from the inventory file lines about ssh ke in the
+        # /runner/env location as this is where key is mounted in the ansible
+        # runner pod but we want to use key provided with the -p parameter
+        # instead
+        sed -i '/ansible_ssh_private_key_file: \/runner/d' $inventory_file
     fi
 }
 
