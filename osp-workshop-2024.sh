@@ -59,6 +59,7 @@ while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
            ;;
        d)
            ansible_params="$ansible_params -vvvv"
+           debug=true
            ;;
        f)
            inventory_secret_name=$OPTARG

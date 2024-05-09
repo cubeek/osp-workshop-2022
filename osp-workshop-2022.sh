@@ -73,6 +73,7 @@ while getopts "b:dKf:i:p:u:h" opt_key; do
            ;;
        d)
            ansible_params=-vv
+           debug=true
            ;;
        f)
            remote_inventory_file=$OPTARG
