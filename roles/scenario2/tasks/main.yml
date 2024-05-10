@@ -1,32 +1,26 @@
 ---
-- name: break environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: break.yml
-    apply:
-      tags: break
-  when: inventory_hostname.startswith('undercloud')
-  tags: break
+- name: Load Tripleo variables
+  ansible.builtin.include_vars: tripleo.yml
+  when: installer == 'tripleo'
+  tags: always
 
-- name: grade environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: grade.yml
-    apply:
-      tags: grade
-  when: inventory_hostname.startswith('undercloud')
-  tags: grade
+- name: Load Podified variables
+  ansible.builtin.include_vars: podified.yml
+  when: installer == 'podified'
+  tags: always
 
-- name: fix environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: fix.yml
+- name: Run scenario on the Tripleo environment
+  ansible.builtin.include_tasks: scenario.yml
+  when: installer == 'tripleo'
+  args:
     apply:
-      tags: fix
-  when: inventory_hostname.startswith('undercloud')
-  tags: fix
+      when: inventory_hostname.startswith('undercloud')
+  tags: always
 
-- name: cleanup environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: cleanup.yml
+- name: Run scenario on the Podifies environment
+  ansible.builtin.include_tasks: scenario.yml
+  when: installer == 'podified'
+  args:
     apply:
-      tags: cleanup
-  when: inventory_hostname.startswith('undercloud')
-  tags: cleanup
+      delegate_to: 127.0.0.1
+  tags: always
