@@ -2,7 +2,7 @@
 
 source ./osp-workshop-common.sh
 
-DATADIR="$WORKDIR/.data"
+DATADIR="/tmp/ovn_training/data"
 
 inventory_file=$DATADIR/edpm-inventory.yaml
 kubeconfig_file=$HOME/.kube/config
