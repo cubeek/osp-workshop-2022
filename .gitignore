@@ -2,3 +2,4 @@ ansible_facts_cache/
 edpm-inventory.yaml
 playbooks/downloads/
 playbooks/.data
+playbooks/cirros*
