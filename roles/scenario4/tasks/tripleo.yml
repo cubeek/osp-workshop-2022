@@ -1,0 +1,45 @@
+---
+- name: Load Tripleo variables
+  ansible.builtin.include_vars: tripleo.yml
+  when: installer == 'tripleo'
+  tags: always
+
+- name: break environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: break.yml
+    apply:
+      tags: break
+  when: inventory_hostname.startswith('undercloud')
+  tags: break
+
+- name: grade environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+  when: inventory_hostname.startswith('undercloud')
+  tags: grade
+
+- name: fix environment - run neutron_api tasks
+  ansible.builtin.include_tasks:
+    file: fix_controller.yml
+    apply:
+      tags: fix
+  when: inventory_hostname == groups['Controller'][0]
+  tags: fix
+
+- name: fix environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: fix_undercloud.yml
+    apply:
+      tags: fix
+  when: inventory_hostname.startswith('undercloud')
+  tags: fix
+
+- name: cleanup environment - run undercloud tasks
+  ansible.builtin.include_tasks:
+    file: cleanup.yml
+    apply:
+      tags: cleanup
+  when: inventory_hostname.startswith('undercloud')
+  tags: cleanup

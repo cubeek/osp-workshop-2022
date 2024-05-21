@@ -1,4 +1,22 @@
 ---
+- name: Find neutron container name
+  when: installer == "podified"
+  block:
+  - name: Get neutron api POD name
+    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=neutron -o name | head -n 1"
+    register: neutron_pods
+  - name: Set neutron POD name
+    ansible.builtin.set_fact:
+      # NOTE(slaweq): two dashes at the end are here just to add them to the final command
+      # because when executing command with 'oc exec' all arguments which should be passed to the
+      # final command run in the pod needs to be separated like that.
+      neutron_container: "{{ neutron_pods.stdout }} --"
+  
+- name: Set neutron container name
+  ansible.builtin.set_fact:
+    neutron_container: "neutron_api"
+  when: installer == "tripleo"
+
 - name: fix the scenario {{ scenario }}
-  become: yes
-  shell: podman exec -it neutron_api neutron-ovn-db-sync-util --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --ovn-neutron_sync_mode repair
+  become: "{{ 'yes' if installer == 'tripleo' else 'no' }}"
+  shell: "{{ container_run_cmd }} {{ neutron_container }} neutron-ovn-db-sync-util --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini --ovn-neutron_sync_mode repair"

@@ -1,0 +1,44 @@
+---
+- name: Load Tripleo variables
+  ansible.builtin.include_vars: podified.yml
+  tags: always
+
+- name: break environment
+  ansible.builtin.include_tasks:
+    file: break.yml
+    apply:
+      tags: break
+      delegate_to: 127.0.0.1
+  tags: break
+
+- name: grade environment
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+      delegate_to: 127.0.0.1
+  tags: grade
+
+- name: fix environment - run neutron_api tasks
+  ansible.builtin.include_tasks:
+    file: fix_controller.yml
+    apply:
+      tags: fix
+      delegate_to: 127.0.0.1
+  tags: fix
+
+- name: fix environment
+  ansible.builtin.include_tasks:
+    file: fix_undercloud.yml
+    apply:
+      tags: fix
+      delegate_to: 127.0.0.1
+  tags: fix
+
+- name: cleanup environment
+  ansible.builtin.include_tasks:
+    file: cleanup.yml
+    apply:
+      tags: cleanup
+      delegate_to: 127.0.0.1
+  tags: cleanup
