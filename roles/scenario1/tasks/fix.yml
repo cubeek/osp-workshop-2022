@@ -3,4 +3,4 @@
   shell: |
     {{ osp_get_credentials_cmd }}
 
-    {{oc_cmd }} openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
+    {{ oc_osp_cmd }} openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg

@@ -2,7 +2,7 @@
 
 set -e
 
-OC_COMMAND="{{ oc_cmd }}"
+OC_COMMAND="{{ oc_osp_cmd }}"
 {{ osp_get_credentials_cmd }}
 
 if ! $OC_COMMAND openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
