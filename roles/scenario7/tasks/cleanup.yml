@@ -2,15 +2,15 @@
 
 - name: "delete OpenStack resources for scenario {{ scenario }}"
   shell: |
-    source {{ overcloudrc_file }}
+    {{ osp_get_credentials_cmd }}
 
-    openstack server delete scenario-{{ scenario }}-vm
+    {{ oc_osp_cmd }} openstack server delete scenario-{{ scenario }}-vm
 
-    openstack keypair delete scenario-{{ scenario }}-key
+    {{ oc_osp_cmd }} openstack keypair delete scenario-{{ scenario }}-key
 
-    openstack router delete scenario-{{ scenario }}-router
+    {{ oc_osp_cmd }} openstack router delete scenario-{{ scenario }}-router
 
-    openstack security group delete scenario-{{ scenario }}-sg
+    {{ oc_osp_cmd }} openstack security group delete scenario-{{ scenario }}-sg
 
 - name: "delete scenario {{ scenario }} working directory"
   ansible.builtin.file:

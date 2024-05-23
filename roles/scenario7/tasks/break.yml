@@ -1,16 +1,48 @@
 ---
-- name: execute tasks on the undercloud
-  include_tasks: break_undercloud.yml
-  when: inventory_hostname.startswith('undercloud')
+- name: "create scenario {{ scenario}} working directory"
+  ansible.builtin.file:
+    path: "{{ working_dir }}/.scenario{{ scenario }}"
+    state: directory
 
-- name: execute tasks on controller
-  include_tasks: break_controller.yml
-  when: inventory_hostname == groups['Controller'][0]
+- name: Upload scenario to the undercloud
+  ansible.builtin.template:
+    src: create_env.sh.j2
+    dest: "{{ create_env_file }}"
+    mode: '0755'
 
-- name: poison ARP cache on nodes
-  ansible.builtin.shell: |
-    # OVN sends garp after 10 seconds
-    sleep 10
-    mac={{ hostvars[groups['Controller'][0]]['lrp_mac']['stdout'] }}
-    ip neigh replace $(ip neigh | awk -v mac=$mac '/{{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }}/{ print $1 " " $2 " " $3 " " $4 " " mac " nud stale"}')
-  become: yes
+- name: Execute environment
+  ansible.builtin.shell: "{{ create_env_file }}"
+  register: create_env_output
+
+- name: Set floating IP fact on Tripleo environment
+  ansible.builtin.set_fact:
+    floating_ip: "{{ hostvars['undercloud']['create_env_output']['stdout_lines'][-1] }}"
+  when: installer == 'tripleo'
+
+- name: Set floating IP fact on the Podified environment
+  ansible.builtin.set_fact:
+    floating_ip: "{{ create_env_output['stdout_lines'][-1] }}"
+  when: installer == 'podified'
+
+- name: "wait 300 seconds for {{ floating_ip }} to become reachable"
+  ansible.builtin.wait_for:
+    port: 22
+    host: "{{ floating_ip }}"
+    delay: 10
+
+- name: Delete environment file
+  ansible.builtin.file:
+    path: "{{ create_env_file }}"
+    state: absent
+
+- name: Fetch SSH key file
+  ansible.builtin.fetch:
+    src: "{{ ssh_key_file }}"
+    dest: "{{ ssh_key_file }}"
+    flat: yes
+
+- name: Create message
+  ansible.builtin.copy:
+    dest: "{{ workshop_message_file }}"
+    content: "Run the following command: \nssh -i {{ ssh_key_file }} cirros@{{ floating_ip }}\n"
+  delegate_to: 127.0.0.1

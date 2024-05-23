@@ -1,0 +1,29 @@
+---
+- name: execute tasks on the control plane
+  ansible.builtin.include_tasks:
+    file: break.yml
+    apply:
+      tags: break
+      delegate_to: 127.0.0.1
+
+- name: execute tasks on controller
+  ansible.builtin.include_tasks:
+    file: break_controller.yml
+    apply:
+      tags: break
+      delegate_to: 127.0.0.1
+
+- name: poison ARP cache on nodes
+  ansible.builtin.shell: |
+    # OVN sends garp after 10 seconds
+    sleep 10
+    ip neigh replace $(ip neigh | awk -v mac={{ lrp_mac.stdout }} '/{{ floating_ip }}/{ print $1 " " $2 " " $3 " " $4 " " mac " nud stale"}')
+  become: true
+
+- name: poison ARP cache on localhost
+  ansible.builtin.shell: |
+    # OVN sends garp after 10 seconds
+    sleep 10
+    ip neigh replace $(ip neigh | awk -v mac={{ lrp_mac.stdout }} '/{{ floating_ip }}/{ print $1 " " $2 " " $3 " " $4 " " mac " nud stale"}')
+  become: true
+  delegate_to: 127.0.0.1
