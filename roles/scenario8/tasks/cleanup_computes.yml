@@ -5,4 +5,4 @@
     if [ "x$pid" != "x" ]; then
         kill -9 $pid
     fi
-  become: yes
+  become: true

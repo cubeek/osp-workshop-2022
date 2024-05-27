@@ -1,22 +1,23 @@
 ---
 - name: fix the scenario {{ scenario }} on compute nodes
-  become: yes
+  become: true
   shell: |
     ovs-ofctl del-flows br-int
-    systemctl restart tripleo_ovn_controller
-  when: inventory_hostname in groups['Compute']
+      systemctl restart {{ ovn_controller_service_name }}
+  when: (installer == 'tripleo' and inventory_hostname in groups['Compute']) or installer == 'podified'
 
 - name: re-create the VM for the scenario {{ scenario }}
   shell: |
-    source {{ overcloudrc_file }}
+    {{ osp_get_credentials_cmd }}
 
-    fip=$(openstack floating ip list --port $(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c "Floating IP Address" -f value)
-    openstack server delete scenario-{{ scenario }}-vm
-    openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
-    port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
-    openstack floating ip set --port $port_id $fip
+    fip=$({{ oc_osp_cmd }} openstack floating ip list --port $({{ oc_osp_cmd }} openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head -n1) -c "Floating IP Address" -f value)
+    {{ oc_osp_cmd }} openstack server delete scenario-{{ scenario }}-vm
+    {{ oc_osp_cmd }} openstack server create --flavor m1.medium --image {{ image_name }} --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
+    port_id=$({{ oc_osp_cmd }} openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
+    {{ oc_osp_cmd }} openstack floating ip set --port $port_id $fip
     echo $fip
-  when: inventory_hostname in groups['Undercloud']
+  when: (installer == 'tripleo' and inventory_hostname in groups['Undercloud']) or installer == 'podified'
+  delegate_to: "{{ '127.0.0.1' if installer == 'podified' else omit }}"
   register: fip
 
 - name: wait for the VM to come up
@@ -24,4 +25,5 @@
     host={{ fip.stdout_lines[-1] }}
     port=22
     delay=10
-  when: inventory_hostname in groups['Undercloud']
+  when: (installer == 'tripleo' and inventory_hostname in groups['Undercloud']) or installer == 'podified'
+  delegate_to: "{{ '127.0.0.1' if installer == 'podified' else omit }}"
