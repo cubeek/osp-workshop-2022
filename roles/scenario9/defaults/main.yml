@@ -3,3 +3,6 @@ overcloudrc_file: /home/stack/overcloudrc
 public_network: public
 create_env_file: /home/stack/create_env.sh
 ssh_key_file: /tmp/scenario-{{ scenario }}-key.pem
+image_name: "cirros-0.5.2-x86_64"
+image_url: "http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img"
+image_file_name: "{{ image_name }}.img"

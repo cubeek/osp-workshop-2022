@@ -1,23 +1,23 @@
 - name: "delete OpenStack resources for scenario {{ scenario }}"
   shell: |
-    source {{ overcloudrc_file }}
+    {{ osp_get_credentials_cmd }}
 
-    port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value)
-    fips=$(openstack floating ip list --port $port_id -c ID -f value)
+    port_id=$({{ oc_osp_cmd }} openstack port list --server scenario-{{ scenario }}-vm -c ID -f value)
+    fips=$({{ oc_osp_cmd }} openstack floating ip list --port $port_id -c ID -f value)
 
-    openstack server delete scenario-{{ scenario }}-vm
+    {{ oc_osp_cmd }} openstack server delete scenario-{{ scenario }}-vm
 
-    echo $fips | xargs openstack floating ip delete
-    openstack keypair delete scenario-{{ scenario }}-key
+    echo $fips | xargs {{ oc_osp_cmd }} openstack floating ip delete
+    {{ oc_osp_cmd }} openstack keypair delete scenario-{{ scenario }}-key
 
-    openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
-    openstack router delete scenario-{{ scenario }}-router
+    {{ oc_osp_cmd }} openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
+    {{ oc_osp_cmd }} openstack router delete scenario-{{ scenario }}-router
 
-    openstack security group delete scenario-{{ scenario }}-sg
+    {{ oc_osp_cmd }} openstack security group delete scenario-{{ scenario }}-sg
 
-    openstack image delete scenario-{{ scenario }}-image
+    {{ oc_osp_cmd }} openstack image delete scenario-{{ scenario }}-image
 
-    openstack network delete scenario-{{ scenario }}-network
+    {{ oc_osp_cmd }} openstack network delete scenario-{{ scenario }}-network
 
 - name: "delete scenario {{ scenario }} working directory"
   ansible.builtin.file:
