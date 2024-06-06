@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source ./osp-workshop-common.sh
 
 inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
 undercloud=stack@undercloud-0
@@ -72,7 +73,7 @@ while getopts "b:dKf:i:p:u:h" opt_key; do
            backup_name=$OPTARG
            ;;
        d)
-           ansible_params=-vv
+           ansible_params="$ansible_params -vv"
            debug=true
            ;;
        f)
@@ -83,6 +84,7 @@ while getopts "b:dKf:i:p:u:h" opt_key; do
            ;;
        p)
            private_key=$OPTARG
+           ansible_params="$ansible_params --private-key $private_key"
            ;;
        u)
            undercloud=$OPTARG
@@ -97,7 +99,12 @@ while getopts "b:dKf:i:p:u:h" opt_key; do
 done
 
 # This needs to be defined aftar parsing parameters because of variables passed
-ansible_playbook="ansible-playbook $ansible_params -i $inventory_file -e installer=tripleo -e working_dir=$WORKDIR -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
+ansible_playbook="ansible-playbook $ansible_params \
+    -i $inventory_file \
+    -e compute_group_name=$compute_hosts_group_name \
+    -e installer=tripleo \
+    -e working_dir=$WORKDIR \
+    -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
 
 shift $((OPTIND-1))
 
