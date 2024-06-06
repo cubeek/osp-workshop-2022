@@ -4,7 +4,7 @@
   shell: |
     ovs-ofctl del-flows br-int
       systemctl restart {{ ovn_controller_service_name }}
-  when: (installer == 'tripleo' and inventory_hostname in groups['Compute']) or installer == 'podified'
+  when: (installer == 'tripleo' and inventory_hostname in groups[compute_group_name]) or installer == 'podified'
 
 - name: Fix the VM on the Tripleo environment
   block:

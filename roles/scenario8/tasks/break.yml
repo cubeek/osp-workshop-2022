@@ -4,7 +4,7 @@
     file: break_computes.yml
     apply:
       tags: break
-  when: (installer == 'tripleo' and inventory_hostname in groups['Compute']) or installer == 'podified'
+  when: (installer == 'tripleo' and inventory_hostname in groups[compute_group_name]) or installer == 'podified'
   tags: break
 
 - name: execute tasks on the undercloud

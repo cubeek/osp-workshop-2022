@@ -38,7 +38,7 @@
     file: fix.yml
     apply:
       tags: fix
-  when: (installer == 'tripleo' and inventory_hostname in groups["Compute"]) or installer == 'podified'
+  when: (installer == 'tripleo' and inventory_hostname in groups[compute_group_name]) or installer == 'podified'
   tags: fix
 
 - name: cleanup Tripleo environment

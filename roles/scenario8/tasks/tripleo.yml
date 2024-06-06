@@ -38,5 +38,5 @@
     file: cleanup_computes.yml
     apply:
       tags: cleanup
-  when: inventory_hostname in groups['Compute']
+  when: inventory_hostname in groups[compute_group_name]
   tags: cleanup
