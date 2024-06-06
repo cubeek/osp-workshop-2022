@@ -54,7 +54,8 @@ function check_and_get_inventory() {
             echo
             cat << EOF
 Error while trying to get inventory from the OpenShift. Please make sure that there is 'oc' binary available,
-there is proper $kubeconfig_file provided and that OpenStack DataPlane is installed in the $oc_namespace.
+there is proper $kubeconfig_file provided and that at least one OpenStack DataPlaneNodeSet is installed in the $oc_namespace.
+
 EOF
             exit 1
         fi
