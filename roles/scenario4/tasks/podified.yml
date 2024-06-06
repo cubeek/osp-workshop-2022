@@ -1,5 +1,5 @@
 ---
-- name: Load Tripleo variables
+- name: Load Podified variables
   ansible.builtin.include_vars: podified.yml
   tags: always
 
