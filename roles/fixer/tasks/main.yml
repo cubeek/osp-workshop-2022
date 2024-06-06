@@ -25,11 +25,7 @@
 
 - set_fact:
     virt_type="{{ virt_type_check.stdout }}"
-  when: virt_type_check is success
-
-- set_fact:
-    virt_type="kvm"
-  when: virt_type_check is failed
+  when: virt_type_check is ansible.builtin.success
 
 - name: set qemu virt_type
   ansible.builtin.shell: "crudini --set {{ nova_config_path }} libvirt virt_type qemu"
