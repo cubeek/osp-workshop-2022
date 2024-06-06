@@ -5,6 +5,7 @@
   - name: Get neutron api POD name
     ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=neutron -o name | head -n 1"
     register: neutron_pods
+
   - name: Set neutron POD name
     ansible.builtin.set_fact:
       # NOTE(slaweq): two dashes at the end are here just to add them to the final command
