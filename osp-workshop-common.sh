@@ -3,9 +3,11 @@
 WORKDIR=$(dirname "$0")
 SCENARIO_NUM=$(ls -d $WORKDIR/roles/scenario* | sed 's/.*scenario\([0-9]*\)/\1/g' | sort | tail -n1)
 
+DEFAULT_BACKUP_NAME=backup
+
 debug=false
 ansible_params=""
-backup_name=backup
+backup_name=$DEFAULT_BACKUP_NAME
 private_key=""
 
 WORKSHOP_MESSAGE_FILE=/tmp/workshop_message

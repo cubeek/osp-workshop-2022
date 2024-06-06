@@ -2,8 +2,11 @@
 
 source ./osp-workshop-common.sh
 
-inventory_file=$WORKDIR/tripleo-ansible-inventory.yaml
-undercloud=stack@undercloud-0
+DEFAULT_INVENTORY_FILE=$WORKDIR/tripleo-ansible-inventory.yaml
+DEFAULT_UNDERCLOUD=stack@undercloud-0
+
+inventory_file=$DEFAULT_INVENTORY_FILE
+undercloud=$DEFAULT_UNDERCLOUD
 remote_inventory_file=/home/stack/overcloud-deploy/overcloud/tripleo-ansible-inventory.yaml
 compute_hosts_group_name=Compute
 
@@ -51,12 +54,12 @@ ACTIONS:
   restore         restore virtual environment
 
 OPTIONS:
-  -b VALUE        name for the backup (default: $backup_name)
+  -b VALUE        name for the backup (default: $DEFAULT_BACKUP_NAME)
   -d              turn on debug for ansible
-  -i VALUE        relative path to local inventory file (default: $inventory_file)
+  -i VALUE        relative path to local inventory file (default: $DEFAULT_INVENTORY_FILE)
   -f VALUE        relative path to tripleo ansible inventory file on the remote undercloud host (default: $remote_inventory_file)
   -p VALUE        private key to use for the ssh connection to the undercloud (default: user SSH key)
-  -u VALUE        undercloud user and host (default: $undercloud)
+  -u VALUE        undercloud user and host (default: $DEFAULT_UNDERCLOUD)
   -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
   -h              display help
 

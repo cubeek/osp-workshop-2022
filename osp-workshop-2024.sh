@@ -1,14 +1,18 @@
 #!/bin/bash
 
 source ./osp-workshop-common.sh
-
 DATADIR="/tmp/ovn_training/data"
 
-inventory_file=$DATADIR/edpm-inventory.yaml
-kubeconfig_file=$HOME/.kube/config
+DEFAULT_INVENTORY_FILE=$DATADIR/edpm-inventory.yaml
+DEFAULT_KUBECONFIG_FILE=$HOME/.kube/config
+DEFAULT_OC_NAMESPACE=openstack
+DEFAULT_INVENTORY_SECRET_NAME=dataplanenodeset-openstack-edpm-ipam
+
+inventory_file=$DEFAULT_INVENTORY_FILE
+kubeconfig_file=$DEFAULT_KUBECONFIG_FILE
 oc_bin=oc
-oc_namespace=openstack
-inventory_secret_name=dataplanenodeset-openstack-edpm-ipam
+oc_namespace=$DEFAULT_OC_NAMESPACE
+inventory_secret_name=$DEFAULT_INVENTORY_SECRET_NAME
 compute_hosts_group_name=openstack-edpm-ipam
 
 function usage {
@@ -23,14 +27,14 @@ ACTIONS:
   restore         restore virtual environment
 
 OPTIONS:
-  -b VALUE        name for the backup (default: $backup_name)
+  -b VALUE        name for the backup (default: $DEFAULT_BACKUP_NAME)
   -d              turn on debug for ansible
-  -i VALUE        relative path to local inventory file (default: $inventory_file)
+  -i VALUE        relative path to local inventory file (default: $DEFAULT_INVENTORY_FILE)
   -p VALUE        private key to use for the ssh connection to the edpm nodes (default: user SSH key)
-  -c VALUE        absolute path to the kubeconfig file (default: $kubeconfig_file)
+  -c VALUE        absolute path to the kubeconfig file (default: $DEFAULT_KUBECONFIG_FILE)
   -o VALUE        absolute path to the oc binary (default: oc needs to be in the one of the locations from the PATH variable)
-  -n VALUE        name of the OpenShift namespace where RHOSO is installed (default: $oc_namespace)
-  -f VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $inventory_secret_name)
+  -n VALUE        name of the OpenShift namespace where RHOSO is installed (default: $DEFAULT_OC_NAMESPACE)
+  -f VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $DEFAULT_INVENTORY_SECRET_NAME)
   -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
   -h              display help
 
