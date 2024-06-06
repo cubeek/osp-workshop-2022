@@ -101,7 +101,7 @@ while getopts "b:dKf:i:p:u:h" opt_key; do
    esac
 done
 
-# This needs to be defined aftar parsing parameters because of variables passed
+# This needs to be defined after parsing parameters because of variables passed
 ansible_playbook="ansible-playbook $ansible_params \
     -i $inventory_file \
     -e compute_group_name=$compute_hosts_group_name \
