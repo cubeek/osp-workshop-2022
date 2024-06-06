@@ -14,15 +14,9 @@
   ansible.builtin.shell: "{{ create_env_file }}"
   register: create_env_output
 
-- name: Set floating IP fact on Tripleo environment
-  ansible.builtin.set_fact:
-    floating_ip: "{{ hostvars['undercloud']['create_env_output']['stdout_lines'][-1] }}"
-  when: installer == 'tripleo'
-
-- name: Set floating IP fact on the Podified environment
+- name: Set floating IP fact
   ansible.builtin.set_fact:
     floating_ip: "{{ create_env_output['stdout_lines'][-1] }}"
-  when: installer == 'podified'
 
 - name: "wait 300 seconds for {{ floating_ip }} to become reachable"
   ansible.builtin.wait_for:

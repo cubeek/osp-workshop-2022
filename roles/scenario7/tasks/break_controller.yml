@@ -23,13 +23,13 @@
   
   - name: Set ovn POD name
     ansible.builtin.set_fact:
-      ovn_container: "{{ ovn_pods.stdout }}"
+      ovn_pod: "{{ ovn_pods.stdout }}"
   
-  - name: Break OVN database
+  - name: Modify OVN database
     shell: |
-      router_uuid=$({{ container_run_cmd }} {{ ovn_container }} -- ovn-nbctl find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
-      {{ container_run_cmd }} {{ ovn_container }} -- ovn-nbctl lr-nat-add $router_uuid dnat_and_snat {{ floating_ip }} 192.168.1{{ scenario }}0.4
-      lrp=$({{ container_run_cmd }} {{ ovn_container }} ovn-nbctl lrp-list $router_uuid | awk '{ print $1 }')
-      {{ container_run_cmd }} {{ ovn_container }} ovn-nbctl get logical_router_port $lrp mac | tr -d '"'
+      router_uuid=$({{ container_run_cmd }} {{ ovn_pod }} -- ovn-nbctl find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
+      {{ container_run_cmd }} {{ ovn_pod }} -- ovn-nbctl lr-nat-add $router_uuid dnat_and_snat {{ floating_ip }} 192.168.1{{ scenario }}0.4
+      lrp=$({{ container_run_cmd }} {{ ovn_pod }} ovn-nbctl lrp-list $router_uuid | awk '{ print $1 }')
+      {{ container_run_cmd }} {{ ovn_pod }} ovn-nbctl get logical_router_port $lrp mac | tr -d '"'
     register: lrp_mac
   when: installer == 'podified'
