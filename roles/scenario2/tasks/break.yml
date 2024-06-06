@@ -18,7 +18,6 @@
   ansible.builtin.file:
     path: "{{ create_env_file }}"
     state: absent
-  when: installer == 'tripleo'
 
 - name: Fetch SSH key file
   ansible.builtin.fetch:
