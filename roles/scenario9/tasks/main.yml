@@ -16,21 +16,13 @@
       tags: break
   tags: break
 
-- name: grade Tripleo environment
+- name: grade environment
   ansible.builtin.include_tasks:
     file: grade.yml
     apply:
       tags: grade
-  when: installer == 'tripleo' and inventory_hostname.startswith('undercloud')
-  tags: grade
-
-- name: grade Podified environment
-  ansible.builtin.include_tasks:
-    file: grade.yml
-    apply:
-      tags: grade
-      delegate_to: '127.0.0.1'
-  when: installer == 'podified'
+      delegate_to: "{{ '127.0.0.1' if installer == 'podified' else ansible_hostname }}"
+  when: (installer == 'tripleo' and inventory_hostname.startswith('undercloud')) or installer == 'podified'
   tags: grade
 
 - name: fix environment
@@ -41,19 +33,11 @@
   when: (installer == 'tripleo' and inventory_hostname in groups[compute_group_name]) or installer == 'podified'
   tags: fix
 
-- name: cleanup Tripleo environment
+- name: cleanup environment
   ansible.builtin.include_tasks:
     file: cleanup.yml
     apply:
       tags: cleanup
-  when: installer == 'tripleo' and inventory_hostname.startswith('undercloud')
-  tags: cleanup
-
-- name: cleanup Podified environment
-  ansible.builtin.include_tasks:
-    file: cleanup.yml
-    apply:
-      tags: cleanup
-      delegate_to: '127.0.0.1'
-  when: installer == 'podified'
+      delegate_to: "{{ '127.0.0.1' if installer == 'podified' else ansible_hostname }}"
+  when: (installer == 'tripleo' and inventory_hostname.startswith('undercloud')) or installer == 'podified'
   tags: cleanup
