@@ -110,35 +110,5 @@ ansible_playbook="ansible-playbook $ansible_params \
     -e workshop_message_file=$WORKSHOP_MESSAGE_FILE"
 
 shift $((OPTIND-1))
+main $1 $2
 
-if [ "x$1" == "x" ]; then
-    echo "Missing action!"
-    echo
-    usage
-fi
-
-case "$1" in
-    "scenario")
-        if [ "x$2" == "x" ]; then
-            echo "Missing scenario number!"
-            echo
-            usage
-        fi
-        if [ $2 -lt 1 -o $2 -gt $SCENARIO_NUM ]; then
-            echo "Wrong scenario number!"
-            echo
-            usage
-        fi
-        prepare_scenario $2
-        ;;
-    "backup")
-        # The backup action is called snapshot
-        do_snapshot snapshot
-        ;;
-    "restore")
-        do_snapshot revert
-        ;;
-    *)
-        usage
-        ;;
-esac
