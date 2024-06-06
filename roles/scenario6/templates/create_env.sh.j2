@@ -13,7 +13,9 @@ fi
 
 if ! {{ oc_osp_cmd }} openstack image show {{ image_name }} > /dev/null 2> /dev/null; then
     # Create Cirros image
-    curl -L {{ image_url }} > {{ image_file_name }}
+    if [ ! -f {{ image_file_name }} ]; then
+        curl -L {{ image_url }} > {{ image_file_name }}
+    fi
     {{ oc_osp_cmd }} openstack image create {{ image_name }} --disk-format qcow2 --container-format bare --public < {{ image_file_name }}
 fi
 
