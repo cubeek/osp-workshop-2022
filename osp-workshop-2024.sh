@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./osp-workshop-common.sh
+source ./osp-workshop-common
 DATADIR="/tmp/ovn_training/data"
 
 DEFAULT_INVENTORY_FILE=$DATADIR/edpm-inventory.yaml

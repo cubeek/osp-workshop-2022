@@ -1,5 +1,3 @@
-#!/bin/bash
-
 WORKDIR=$(dirname "$0")
 SCENARIO_NUM=$(ls -d $WORKDIR/roles/scenario* | sed 's/.*scenario\([0-9]*\)/\1/g' | sort | tail -n1)
 

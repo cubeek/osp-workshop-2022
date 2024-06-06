@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./osp-workshop-common.sh
+source ./osp-workshop-common
 
 DEFAULT_INVENTORY_FILE=$WORKDIR/tripleo-ansible-inventory.yaml
 DEFAULT_UNDERCLOUD=stack@undercloud-0
