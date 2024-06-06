@@ -30,7 +30,7 @@
     file: fix.yml
     apply:
       tags: fix
-  when: (installer == 'tripleo' and inventory_hostname in groups[compute_group_name]) or installer == 'podified'
+  when: inventory_hostname in groups[compute_group_name]
   tags: fix
 
 - name: cleanup environment
