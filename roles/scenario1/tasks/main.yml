@@ -17,7 +17,7 @@
       when: inventory_hostname.startswith('undercloud')
   tags: always
 
-- name: Run scenario on the Podifies environment
+- name: Run scenario on the Podified environment
   ansible.builtin.include_tasks: scenario.yml
   when: installer == 'podified'
   args:
