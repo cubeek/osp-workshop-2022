@@ -34,7 +34,7 @@ OPTIONS:
   -c VALUE        absolute path to the kubeconfig file (default: $DEFAULT_KUBECONFIG_FILE)
   -o VALUE        absolute path to the oc binary (default: oc needs to be in the one of the locations from the PATH variable)
   -n VALUE        name of the OpenShift namespace where RHOSO is installed (default: $DEFAULT_OC_NAMESPACE)
-  -f VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $DEFAULT_INVENTORY_SECRET_NAME)
+  -s VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $DEFAULT_INVENTORY_SECRET_NAME)
   -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
   -h              display help
 
@@ -66,7 +66,7 @@ EOF
     fi
 }
 
-while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
+while getopts "b:dKs:i:p:c:o:n" opt_key; do
     case "$opt_key" in
        b)
            backup_name=$OPTARG
@@ -75,7 +75,7 @@ while getopts "b:dKf:i:p:c:o:u:n" opt_key; do
            ansible_params="$ansible_params -vv"
            debug=true
            ;;
-       f)
+       s)
            inventory_secret_name=$OPTARG
            ;;
        i)
