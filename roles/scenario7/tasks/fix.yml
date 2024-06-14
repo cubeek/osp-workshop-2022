@@ -1,16 +1,7 @@
 ---
-- name: Fix scenario on the Tripleo environment
+- name: "Fix scenario on the {{ installer }} environment"
   ansible.builtin.include_tasks:
-    file: fix_tripleo.yml
+    file: "fix_{{ installer }}.yml"
     apply:
       tags: fix
-  when: installer == 'tripleo'
-  tags: fix
-
-- name: Fix scenario on the Podified environment
-  ansible.builtin.include_tasks:
-    file: fix_podified.yml
-    apply:
-      tags: fix
-  when: installer == 'podified'
   tags: fix

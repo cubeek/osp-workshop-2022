@@ -1,11 +1,6 @@
 ---
-- name: Load Tripleo variables
-  ansible.builtin.include_vars: tripleo.yaml
-  when: installer == 'tripleo'
-
-- name: Load Podified variables
-  ansible.builtin.include_vars: podified.yaml
-  when: installer == 'podified'
+- name: "Load {{ installer }} variables"
+  ansible.builtin.include_vars: "{{ installer }}.yaml"
 
 - name: Upload crudini to the hosts
   ansible.builtin.copy:

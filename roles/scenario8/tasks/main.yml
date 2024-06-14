@@ -1,10 +1,5 @@
 ---
-- name: Run scenario tasks on the Tripleo environment
-  ansible.builtin.include_tasks: tripleo.yml
+- name: "Run scenario tasks on the {{ installer }} environment"
+  ansible.builtin.include_tasks: "{{ installer }}.yml"
   when: installer == 'tripleo'
-  tags: always
-
-- name: Run scenario tasks on the Podified environment
-  ansible.builtin.include_tasks: podified.yml
-  when: installer == 'podified'
   tags: always

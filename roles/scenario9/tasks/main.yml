@@ -1,12 +1,6 @@
 ---
-- name: Load Tripleo variables
-  ansible.builtin.include_vars: tripleo.yml
-  when: installer == 'tripleo'
-  tags: always
-
-- name: Load Podified variables
-  ansible.builtin.include_vars: podified.yml
-  when: installer == 'podified'
+- name: "Load {{ installer }} variables"
+  ansible.builtin.include_vars: "{{ installer }}.yml"
   tags: always
 
 - name: break environment
