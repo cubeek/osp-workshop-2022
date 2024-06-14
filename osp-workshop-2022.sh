@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ./osp-workshop-common
+WORKDIR=$(dirname "$0")
+source $WORKDIR/osp-workshop-common
 
 DEFAULT_INVENTORY_FILE=$WORKDIR/tripleo-ansible-inventory.yaml
 DEFAULT_UNDERCLOUD=stack@undercloud-0

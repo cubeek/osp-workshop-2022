@@ -1,7 +1,8 @@
 #!/bin/bash
 
-source ./osp-workshop-common
-DATADIR="/tmp/ovn_training/data"
+WORKDIR=$(dirname "$0")
+source $WORKDIR/osp-workshop-common
+    DATADIR="/tmp/ovn_training/data"
 
 DEFAULT_INVENTORY_FILE=$DATADIR/edpm-inventory.yaml
 DEFAULT_KUBECONFIG_FILE=$HOME/.kube/config
