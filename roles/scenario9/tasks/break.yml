@@ -1,8 +1,25 @@
 ---
 - name: execute tasks on compute nodes
-  include_tasks: break_computes.yml
-  when: inventory_hostname in groups['Compute']
+  include_tasks:
+    file: break_computes.yml
+    apply:
+      tags: break
+  when: inventory_hostname in groups[compute_group_name]
+  tags: break
 
 - name: execute tasks on the undercloud
-  include_tasks: break_undercloud.yml
-  when: inventory_hostname.startswith('undercloud')
+  include_tasks:
+    file: break_controllers.yml
+    apply:
+      tags: break
+  when: installer == 'tripleo' and inventory_hostname.startswith('undercloud')
+  tags: break
+
+- name: execute tasks on the control plane
+  include_tasks:
+    file: break_controllers.yml
+    apply:
+      delegate_to: 127.0.0.1
+      tags: break
+  when: installer == 'podified'
+  tags: break

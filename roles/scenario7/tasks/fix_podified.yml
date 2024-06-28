@@ -1,0 +1,48 @@
+---
+- name: find the floating ip
+  ansible.builtin.shell: |
+    {{ osp_get_credentials_cmd }}
+
+    {{ oc_osp_cmd }} openstack port list --server scenario-{{ scenario }}-vm -c "Fixed IP Addresses" -f json | jq -r '.[0]["Fixed IP Addresses"][0].ip_address'
+  delegate_to: 127.0.0.1
+  register: floating_ip
+
+- name: Find OVN POD name
+  block:
+  - name: Get OVN POD
+    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=ovsdbserver-nb -o name | head -n 1"
+    register: ovn_pod_cmd
+    delegate_to: 127.0.0.1
+
+  - name: Set ovn POD name
+    ansible.builtin.set_fact:
+      ovn_pod: "{{ ovn_pod_cmd.stdout }}"
+    delegate_to: 127.0.0.1
+
+  - name: Ensure ovn_pod name was found
+    ansible.builtin.fail:
+      msg: Cannot find ovsdbserver-nb POD name
+    when: ovn_pod == ""
+
+- name: execute tasks in ovn POD
+  ansible.builtin.shell: |
+    router_uuid=$({{ container_run_cmd }} {{ ovn_pod }} -- ovn-nbctl find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
+    {{ container_run_cmd }} {{ ovn_pod }} -- ovn-nbctl lr-nat-del $router_uuid dnat_and_snat {{ floating_ip.stdout_lines[-1] }} || :
+  delegate_to: 127.0.0.1
+
+- name: cleanup ARP cache on nodes
+  ansible.builtin.shell: |
+    mac_data=$(ip neigh | awk '/{{ floating_ip.stdout }}/{ print $1 " " $2 " " $3}')
+    if [ "x" != "x$mac_data" ]; then
+      ip neigh del $mac_data
+    fi
+  become: true
+
+- name: cleanup ARP cache on localhost
+  ansible.builtin.shell: |
+    mac_data=$(ip neigh | awk '/{{ floating_ip.stdout }}/{ print $1 " " $2 " " $3}')
+    if [ "x" != "x$mac_data" ]; then
+      ip neigh del $mac_data
+    fi
+  become: true
+  delegate_to: 127.0.0.1

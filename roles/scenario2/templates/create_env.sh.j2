@@ -2,46 +2,49 @@
 
 set -e
 
-source {{ overcloudrc_file }}
+OC_COMMAND="{{ oc_osp_cmd }}"
+{{ osp_get_credentials_cmd }}
 
-if ! openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
-    openstack network create --external --provider-network-type flat --provider-physical-network datacentre {{ public_network }}
-    openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
+if ! $OC_COMMAND openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
+    $OC_COMMAND openstack network create --external --provider-network-type flat --provider-physical-network datacentre {{ public_network }}
+    $OC_COMMAND openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
 fi
 
-if ! openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
+if ! $OC_COMMAND openstack image show {{ image_name }} > /dev/null 2> /dev/null; then
     # Create Cirros image
-    curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > cirros-0.5.2-x86_64-disk.img
-    openstack image create cirros-0.5.2-x86_64 --file cirros-0.5.2-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+    if [ ! -f {{ image_file_name }} ]; then
+        curl -L {{ image_url }} > {{ image_file_name }}
+    fi
+    $OC_COMMAND openstack image create {{ image_name }} --disk-format qcow2 --container-format bare --public < {{ image_file_name }}
 fi
 
 # Create bad image
 image_file={{ working_dir }}/.scenario{{ scenario }}/scenario-{{ scenario }}-image.img
 touch $image_file
-openstack image create scenario-{{ scenario }}-image --file $image_file --disk-format qcow2 --container-format bare --public
+$OC_COMMAND openstack image create scenario-{{ scenario }}-image --disk-format qcow2 --container-format bare --public < $image_file
 
-openstack network create scenario-{{ scenario }}-network
+$OC_COMMAND openstack network create scenario-{{ scenario }}-network
 
-openstack subnet create --network scenario-{{ scenario }}-network scenario-{{ scenario }}-subnet --subnet-range 192.168.1{{ scenario }}0.0/24
+$OC_COMMAND openstack subnet create --network scenario-{{ scenario }}-network scenario-{{ scenario }}-subnet --subnet-range 192.168.1{{ scenario }}0.0/24
 
-openstack router create scenario-{{ scenario }}-router
+$OC_COMMAND openstack router create scenario-{{ scenario }}-router
 
-openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
-openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
+$OC_COMMAND openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
+$OC_COMMAND openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
 
-openstack flavor show m1.medium > /dev/null 2> /dev/null || openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+$OC_COMMAND openstack flavor show m1.medium > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
 
-openstack security group create scenario-{{ scenario }}-sg
-openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
-openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
+$OC_COMMAND openstack security group create scenario-{{ scenario }}-sg
+$OC_COMMAND openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
+$OC_COMMAND openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
 
-openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
+$OC_COMMAND openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
 chmod 0600 {{ ssh_key_file }}
 
-openstack server create --flavor m1.medium --image scenario-{{ scenario }}-image --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
-openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
+$OC_COMMAND openstack server create --flavor m1.medium --image scenario-{{ scenario }}-image --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
+$OC_COMMAND openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
 
-port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
-fip=$(openstack floating ip create --port $port_id {{ public_network }} | awk '/floating_ip_address/{ print $4 }')
+port_id=$($OC_COMMAND openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
+fip=$($OC_COMMAND openstack floating ip create --port $port_id {{ public_network }} | awk '/floating_ip_address/{ print $4 }')
 
 echo "$fip"

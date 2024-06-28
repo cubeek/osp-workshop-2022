@@ -1,0 +1,19 @@
+- name: "delete OpenStack resources for scenario {{ scenario }}"
+  shell: |
+    {{ osp_get_credentials_cmd }}
+
+    {{ oc_osp_cmd }} openstack server delete scenario-{{ scenario }}-vm
+
+    {{ oc_osp_cmd }} openstack keypair delete scenario-{{ scenario }}-key
+
+    {{ oc_osp_cmd }} openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
+    {{ oc_osp_cmd }} openstack router delete scenario-{{ scenario }}-router
+
+    {{ oc_osp_cmd }} openstack security group delete scenario-{{ scenario }}-sg
+
+    {{ oc_osp_cmd }} openstack network delete scenario-{{ scenario }}-network
+
+- name: "delete scenario {{ scenario }} working directory"
+  ansible.builtin.file:
+    path: "{{ working_dir }}/.scenario{{ scenario }}"
+    state: absent

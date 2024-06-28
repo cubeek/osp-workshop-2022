@@ -2,31 +2,33 @@
 
 set -e
 
-source {{ overcloudrc_file }}
+{{ osp_get_credentials_cmd }}
 
-if ! openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
-    openstack network create --external --provider-network-type flat --provider-physical-network datacentre {{ public_network }}
-    openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
+if ! {{ oc_osp_cmd }} openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
+    {{ oc_osp_cmd }} openstack network create --external --provider-network-type flat --provider-physical-network datacentre {{ public_network }}
+    {{ oc_osp_cmd }} openstack subnet create --no-dhcp --gateway 10.0.0.1 --network {{ public_network }} --subnet-range 10.0.0.0/24 --allocation-pool start=10.0.0.151,end=10.0.0.254 {{ public_network }}_subnet
 fi
 
-openstack subnet set --no-dhcp $(openstack subnet list --network {{ public_network }} --ip-version 4 -c ID -f value | head -n1)
+{{ oc_osp_cmd }} openstack subnet set --no-dhcp $({{ oc_osp_cmd }} openstack subnet list --network {{ public_network }} --ip-version 4 -c ID -f value | head -n1)
 
-if ! openstack image show cirros-0.5.2-x86_64 > /dev/null 2> /dev/null; then
+if ! {{ oc_osp_cmd }} openstack image show {{ image_name }} > /dev/null 2> /dev/null; then
     # Create Cirros image
-    curl -L http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img > cirros-0.5.2-x86_64-disk.img
-    openstack image create cirros-0.5.2-x86_64 --file cirros-0.5.2-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+    if [ ! -f {{ image_file_name }} ]; then
+        curl -L {{ image_url }} > {{ image_file_name }}
+    fi
+    {{ oc_osp_cmd }} openstack image create {{ image_name }} --disk-format qcow2 --container-format bare --public < {{ image_file_name }}
 fi
 
-openstack flavor show m1.medium > /dev/null 2> /dev/null || openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+{{ oc_osp_cmd }} openstack flavor show m1.medium > /dev/null 2> /dev/null || {{ oc_osp_cmd }} openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
 
-openstack security group create scenario-{{ scenario }}-sg
-openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
-openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
+{{ oc_osp_cmd }} openstack security group create scenario-{{ scenario }}-sg
+{{ oc_osp_cmd }} openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
+{{ oc_osp_cmd }} openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
 
-openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
+{{ oc_osp_cmd }} openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
 chmod 0600 {{ ssh_key_file }}
 
-address=$(openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id={{ public_network }} --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait | grep "^| addresses" | sed 's/.*{{ public_network }}=\([0-9\.]*\).*/\1/')
-openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
+address=$({{ oc_osp_cmd }} openstack server create --flavor m1.medium --image {{ image_name }} --nic net-id={{ public_network }} --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait | grep "^| addresses" | sed 's/.*{{ public_network }}=\([0-9\.]*\).*/\1/')
+{{ oc_osp_cmd }} openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
 
 echo "$address"

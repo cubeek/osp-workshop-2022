@@ -1,0 +1,3 @@
+---
+oc_osp_cmd: ""
+osp_get_credentials_cmd: "source {{ overcloudrc_file }}"

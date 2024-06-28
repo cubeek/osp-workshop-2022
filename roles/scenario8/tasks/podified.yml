@@ -1,0 +1,41 @@
+---
+- name: Load Podified variables
+  ansible.builtin.include_vars: podified.yml
+  tags: always
+
+- name: break environment
+  ansible.builtin.include_tasks:
+    file: break.yml
+    apply:
+      tags: break
+  tags: break
+
+- name: grade environment
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+      delegate_to: 127.0.0.1      
+  tags: grade
+
+- name: fix environment
+  ansible.builtin.include_tasks:
+    file: fix.yml
+    apply:
+      tags: fix
+  tags: fix
+
+- name: cleanup environment
+  ansible.builtin.include_tasks:
+    file: cleanup_controllers.yml
+    apply:
+      tags: cleanup
+      delegate_to: 127.0.0.1
+  tags: cleanup
+
+- name: cleanup environment
+  ansible.builtin.include_tasks:
+    file: cleanup_computes.yml
+    apply:
+      tags: cleanup
+  tags: cleanup

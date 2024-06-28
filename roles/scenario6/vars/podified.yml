@@ -1,0 +1,3 @@
+---
+oc_osp_cmd: "{{ oc_bin }} -n {{ oc_namespace }} exec openstackclient -- "
+osp_get_credentials_cmd: ""

@@ -1,4 +1,7 @@
 ---
+- name: "Load {{ installer }} variables"
+  ansible.builtin.include_vars: "{{ installer }}.yaml"
+
 - name: Upload crudini to the hosts
   ansible.builtin.copy:
     src: "{{ crudini_rpm }}"
@@ -10,18 +13,23 @@
   become: yes
 
 - name: get qemu virt_type
-  ansible.builtin.shell: crudini --get /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf libvirt virt_type
+  ansible.builtin.shell: "crudini --get {{ nova_config_path }} libvirt virt_type"
   become: yes
-  register: virt_type
+  register: virt_type_check
+  ignore_errors: true
+
+- set_fact:
+    virt_type="{{ virt_type_check.stdout }}"
+  when: virt_type_check is ansible.builtin.success
 
 - name: set qemu virt_type
-  ansible.builtin.shell: crudini --set /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf libvirt virt_type qemu
+  ansible.builtin.shell: "crudini --set {{ nova_config_path }} libvirt virt_type qemu"
   become: yes
-  when: virt_type.stdout != "qemu"
+  when: virt_type != "qemu"
 
 - name: restart nova compute
   ansible.builtin.systemd:
     state: restarted
-    name: tripleo_nova_compute.service
+    name: "{{ nova_compute_service_name }}"
   become: yes
-  when: virt_type.stdout != "qemu"
+  when: virt_type != "qemu"

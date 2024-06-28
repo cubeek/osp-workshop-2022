@@ -1,0 +1,16 @@
+---
+- name: execute tasks on the undercloud
+  include_tasks: break.yml
+  when: inventory_hostname.startswith('undercloud')
+
+- name: execute tasks on controller
+  include_tasks: break_controller.yml
+  when: inventory_hostname == groups['Controller'][0]
+
+- name: poison ARP cache on nodes
+  ansible.builtin.shell: |
+    # OVN sends garp after 10 seconds
+    sleep 10
+    mac={{ hostvars[groups['Controller'][0]]['lrp_mac']['stdout'] }}
+    ip neigh replace $(ip neigh | awk -v mac=$mac '/{{ hostvars['undercloud']['floating_ip']['stdout_lines'][-1] }}/{ print $1 " " $2 " " $3 " " $4 " " mac " nud stale"}')
+  become: yes

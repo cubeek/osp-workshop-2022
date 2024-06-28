@@ -1,5 +1,7 @@
 ---
 - name: restart VM so it fetches again the metadata
   shell: |
-    openstack server reboot --hard scenario-{{ scenario }}-vm --wait
+    {{ osp_get_credentials_cmd }}
+
+    {{ oc_osp_cmd }} openstack server reboot --hard scenario-{{ scenario }}-vm --wait
 

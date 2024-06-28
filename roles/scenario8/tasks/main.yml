@@ -1,38 +1,5 @@
 ---
-- name: break environment
-  ansible.builtin.include_tasks:
-    file: break.yml
-    apply:
-      tags: break
-  tags: break
-
-- name: grade environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: grade.yml
-    apply:
-      tags: grade
-  when: inventory_hostname.startswith('undercloud')
-  tags: grade
-
-- name: fix environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: fix.yml
-    apply:
-      tags: fix
-  tags: fix
-
-- name: cleanup environment - run undercloud tasks
-  ansible.builtin.include_tasks:
-    file: cleanup_undercloud.yml
-    apply:
-      tags: cleanup
-  when: inventory_hostname.startswith('undercloud')
-  tags: cleanup
-
-- name: cleanup environment - run compute tasks
-  ansible.builtin.include_tasks:
-    file: cleanup_computes.yml
-    apply:
-      tags: cleanup
-  when: inventory_hostname in groups['Compute']
-  tags: cleanup
+- name: "Run scenario tasks on the {{ installer }} environment"
+  ansible.builtin.include_tasks: "{{ installer }}.yml"
+  when: installer == 'tripleo'
+  tags: always
