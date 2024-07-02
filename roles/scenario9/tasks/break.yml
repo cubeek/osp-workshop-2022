@@ -20,6 +20,7 @@
     file: break_controllers.yml
     apply:
       delegate_to: 127.0.0.1
+      run_once: true
       tags: break
   when: installer == 'podified'
   tags: break
