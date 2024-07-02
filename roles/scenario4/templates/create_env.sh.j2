@@ -27,7 +27,7 @@ $OC_COMMAND openstack router create scenario-{{ scenario }}-router
 $OC_COMMAND openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
 $OC_COMMAND openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
 
-$OC_COMMAND openstack flavor show m1.medium > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+$OC_COMMAND openstack flavor show m1.small > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.small --disk 1 --vcpus 1 --ram 512
 
 $OC_COMMAND openstack security group create scenario-{{ scenario }}-sg
 $OC_COMMAND openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
@@ -38,7 +38,7 @@ chmod 0600 {{ ssh_key_file }}
 
 $OC_COMMAND openstack port delete $($OC_COMMAND openstack port list --device-id=ovnmeta-$network_id -f value -c ID)
 
-$OC_COMMAND openstack server create --flavor m1.medium --image {{ image_name }} --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
+$OC_COMMAND openstack server create --flavor m1.small --image {{ image_name }} --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
 $OC_COMMAND openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
 
 port_id=$($OC_COMMAND openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)

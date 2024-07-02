@@ -28,7 +28,7 @@ $OC_COMMAND openstack router set --enable-snat --external-gateway {{ public_netw
 $OC_COMMAND openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
 
 $OC_COMMAND openstack flavor show m1.tiny > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.tiny --disk 1 --vcpus 1 --ram 64
-$OC_COMMAND openstack flavor show m1.medium > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+$OC_COMMAND openstack flavor show m1.small > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.small --disk 1 --vcpus 1 --ram 512
 
 $OC_COMMAND openstack security group create scenario-{{ scenario }}-sg
 $OC_COMMAND openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
