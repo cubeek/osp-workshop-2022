@@ -30,8 +30,17 @@ subnet_id=$({{ oc_osp_cmd }} openstack subnet list --network {{ public_network }
 {{ oc_osp_cmd }} openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
 {{ oc_osp_cmd }} openstack security group rule create --ingress --protocol tcp --dst-port 22 scenario-{{ scenario }}-sg
 
-{{ oc_osp_cmd }} openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
-chmod 0600 {{ ssh_key_file }}
+# TODO(slaweq): We can revert that to use OSC to generate ssh keys for us once
+#   we will be using python-openstackclient >= 6.3.0 which contains patch
+#   https://review.opendev.org/c/openstack/python-openstackclient/+/881822
+if type ssh-keygen > /dev/null 2>&1; then
+    yes | ssh-keygen -t ecdsa -f {{ ssh_key_file }} -N "" > /dev/null
+    {{ oc_bin }} -n {{ oc_namespace }} cp {{ ssh_key_file }}.pub openstackclient:/tmp/ssh_key.pub
+    {{ oc_osp_cmd }} openstack keypair create --public-key /tmp/ssh_key.pub scenario-{{ scenario }}-key
+else
+    {{ oc_osp_cmd }} openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
+    chmod 0600 {{ ssh_key_file }}
+fi
 
 address=$({{ oc_osp_cmd }} openstack server create --flavor m1.small --image {{ image_name }} --nic net-id={{ public_network }} --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait | grep "^| addresses" | sed 's/.*{{ public_network }}=\([0-9\.]*\).*/\1/')
 {{ oc_osp_cmd }} openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
