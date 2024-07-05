@@ -11,7 +11,7 @@
 - name: Find OVN POD name
   block:
   - name: Get OVN POD
-    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=ovsdbserver-nb -o name | head -n 1"
+    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=ovsdbserver-nb --field-selector=status.phase==Running -o name | head -n 1"
     register: ovn_pod_cmd
     delegate_to: 127.0.0.1
     run_once: true

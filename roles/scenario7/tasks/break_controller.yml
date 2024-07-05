@@ -18,13 +18,13 @@
 - name: Run some things on the OVN NB POD
   block:
   - name: Get ovn container name
-    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=ovsdbserver-nb -o name | head -n 1"
+    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=ovsdbserver-nb --field-selector=status.phase==Running -o name | head -n 1"
     register: ovn_pods
-  
+
   - name: Set ovn POD name
     ansible.builtin.set_fact:
       ovn_pod: "{{ ovn_pods.stdout }}"
-  
+
   - name: Modify OVN database
     shell: |
       router_uuid=$({{ container_run_cmd }} {{ ovn_pod }} -- ovn-nbctl find logical_router 'external_ids:"neutron:router_name"="scenario-{{ scenario }}-router"' | awk '/^_uuid/{ print $ 3}')
