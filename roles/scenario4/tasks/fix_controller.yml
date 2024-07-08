@@ -3,7 +3,7 @@
   when: installer == "podified"
   block:
   - name: Get neutron api POD name
-    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=neutron -o name | head -n 1"
+    ansible.builtin.shell: "{{ oc_bin }} -n {{ oc_namespace }} get pods -l service=neutron --field-selector=status.phase==Running -o name | head -n 1"
     register: neutron_pod
 
   - name: Set command

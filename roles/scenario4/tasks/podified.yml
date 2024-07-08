@@ -9,6 +9,7 @@
     apply:
       tags: break
       delegate_to: 127.0.0.1
+      run_once: true
   tags: break
 
 - name: grade environment
@@ -17,6 +18,7 @@
     apply:
       tags: grade
       delegate_to: 127.0.0.1
+      run_once: true
   tags: grade
 
 - name: fix environment - run neutron_api tasks
@@ -25,6 +27,7 @@
     apply:
       tags: fix
       delegate_to: 127.0.0.1
+      run_once: true
   tags: fix
 
 - name: fix environment
@@ -33,6 +36,7 @@
     apply:
       tags: fix
       delegate_to: 127.0.0.1
+      run_once: true
   tags: fix
 
 - name: cleanup environment
@@ -41,4 +45,5 @@
     apply:
       tags: cleanup
       delegate_to: 127.0.0.1
+      run_once: true
   tags: cleanup

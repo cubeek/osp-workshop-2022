@@ -27,14 +27,23 @@ $OC_COMMAND openstack router create scenario-{{ scenario }}-router
 $OC_COMMAND openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
 $OC_COMMAND openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
 
-$OC_COMMAND openstack flavor show m1.medium > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+$OC_COMMAND openstack flavor show m1.small > /dev/null 2> /dev/null || $OC_COMMAND openstack flavor create m1.small --disk 1 --vcpus 1 --ram 512
 
 $OC_COMMAND openstack security group create scenario-{{ scenario }}-sg
 
-$OC_COMMAND openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
-chmod 0600 {{ ssh_key_file }}
+# TODO(slaweq): We can revert that to use OSC to generate ssh keys for us once
+#   we will be using python-openstackclient >= 6.3.0 which contains patch
+#   https://review.opendev.org/c/openstack/python-openstackclient/+/881822
+if type ssh-keygen > /dev/null 2>&1; then
+    yes | ssh-keygen -t ecdsa -f {{ ssh_key_file }} -N "" > /dev/null
+    {{ oc_bin }} -n {{ oc_namespace }} cp {{ ssh_key_file }}.pub openstackclient:/tmp/ssh_key.pub
+    $OC_COMMAND openstack keypair create --public-key /tmp/ssh_key.pub scenario-{{ scenario }}-key
+else
+    $OC_COMMAND openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
+    chmod 0600 {{ ssh_key_file }}
+fi
 
-$OC_COMMAND openstack server create --flavor m1.medium --image {{ image_name }} --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
+$OC_COMMAND openstack server create --flavor m1.small --image {{ image_name }} --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --wait
 $OC_COMMAND openstack server show scenario-{{ scenario }}-vm | grep -q "status.*ACTIVE"
 
 port_id=$($OC_COMMAND openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)

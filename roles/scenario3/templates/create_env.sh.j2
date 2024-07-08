@@ -24,7 +24,7 @@ openstack router create scenario-{{ scenario }}-router
 openstack router set --enable-snat --external-gateway {{ public_network }} scenario-{{ scenario }}-router
 openstack router add subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
 
-openstack flavor show m1.medium > /dev/null 2> /dev/null || openstack flavor create m1.medium --disk 10 --vcpus 1 --ram 512
+openstack flavor show m1.small > /dev/null 2> /dev/null || openstack flavor create m1.small --disk 1 --vcpus 1 --ram 512
 
 openstack security group create scenario-{{ scenario }}-sg
 openstack security group rule create --ingress --protocol icmp scenario-{{ scenario }}-sg
@@ -34,7 +34,7 @@ openstack keypair create scenario-{{ scenario }}-key > {{ ssh_key_file }}
 chmod 0600 {{ ssh_key_file }}
 
 hypervisor=$(openstack hypervisor list -c "Hypervisor Hostname" -f value --matching {{ groups['Compute'][0] }})
-openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
+openstack server create --flavor m1.small --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
 
 port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
 fip=$(openstack floating ip create --port $port_id {{ public_network }} --tag scenario-{{ scenario }}-fip | awk '/floating_ip_address/{ print $4 }')

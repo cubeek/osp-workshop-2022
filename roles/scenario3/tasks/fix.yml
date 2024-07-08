@@ -28,7 +28,7 @@
 
       openstack server delete scenario-{{ scenario }}-vm
       hypervisor=$(openstack hypervisor list -c "Hypervisor Hostname" -f value --matching {{ groups['Compute'][0] }})
-      openstack server create --flavor m1.medium --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
+      openstack server create --flavor m1.small --image cirros-0.5.2-x86_64 --nic net-id=scenario-{{ scenario }}-network --key-name scenario-{{ scenario }}-key --security-group scenario-{{ scenario }}-sg scenario-{{ scenario }}-vm --availability-zone nova:$hypervisor
       port_id=$(openstack port list --server scenario-{{ scenario }}-vm -c ID -f value | head)
       fip=$(openstack floating ip list --tags scenario-{{ scenario }}-fip  -c ID -f value)
       openstack floating ip set --port $port_id $fip

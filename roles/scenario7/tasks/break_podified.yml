@@ -5,6 +5,7 @@
     apply:
       tags: break
       delegate_to: 127.0.0.1
+      run_once: true
 
 - name: execute tasks on controller
   ansible.builtin.include_tasks:
@@ -12,6 +13,7 @@
     apply:
       tags: break
       delegate_to: 127.0.0.1
+      run_once: true
 
 - name: poison ARP cache on nodes
   ansible.builtin.shell: |

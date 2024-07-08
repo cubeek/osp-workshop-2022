@@ -1,5 +1,5 @@
 ---
-container_run_cmd: "{{ oc_bin }} -n {{ oc_namespace }} exec"
+container_run_cmd: "{{ oc_bin }} -n {{ oc_namespace }} exec --stdin=true"
 oc_osp_cmd: "{{ container_run_cmd }} openstackclient --"
 osp_get_credentials_cmd: ""
 ovn_controller_service_name: "edpm_ovn_controller"

@@ -15,7 +15,8 @@
     file: grade.yml
     apply:
       tags: grade
-      delegate_to: 127.0.0.1      
+      delegate_to: 127.0.0.1
+      run_once: true
   tags: grade
 
 - name: fix environment
@@ -31,6 +32,7 @@
     apply:
       tags: cleanup
       delegate_to: 127.0.0.1
+      run_once: true
   tags: cleanup
 
 - name: cleanup environment
