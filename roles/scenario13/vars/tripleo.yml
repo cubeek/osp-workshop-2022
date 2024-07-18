@@ -1,0 +1,5 @@
+---
+container_run_cmd: "podman exec -it"
+oc_osp_cmd: ""
+osp_get_credentials_cmd: "source {{ overcloudrc_file }}"
+ovn_controller_service_name: "tripleo_ovn_controller"
