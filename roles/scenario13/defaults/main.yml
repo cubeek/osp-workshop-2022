@@ -1,0 +1,12 @@
+---
+overcloudrc_file: /home/stack/overcloudrc
+public_network: public
+create_env_file: /home/stack/create_env.sh
+ssh_key_file: /tmp/scenario-{{ scenario }}-key.pem
+image_name: "cirros-0.5.2-x86_64"
+image_url: "http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img"
+image_file_name: "{{ working_dir }}/{{ image_name }}.img"
+project_net_segment: 1000
+project_net_physnet: "datacentre"
+temp_results_file: "/tmp/scenario-{{ scenario }}-data"
+pf_tcp_port: 1022
