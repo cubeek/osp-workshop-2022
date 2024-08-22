@@ -1,0 +1,38 @@
+---
+- name: "delete OpenStack resources for scenario {{ scenario }}"
+  shell: |
+    {{ osp_get_credentials_cmd }}
+
+    if [ -f {{ temp_results_file }} ]; then
+      source {{ temp_results_file }}
+      {{ oc_osp_cmd }} openstack floating ip delete $fip_id
+      for pf in $({{ oc_osp_cmd }} openstack floating ip port forwarding list $pf_fip_id -c ID -f value); do
+        {{ oc_osp_cmd }} openstack floating ip port forwarding delete $pf_fip_id $pf
+      done
+      sleep 2
+      {{ oc_osp_cmd }} openstack floating ip delete $pf_fip_id
+    fi
+
+    {{ oc_osp_cmd }} openstack server delete scenario-{{ scenario }}-fip-vm
+    {{ oc_osp_cmd }} openstack server delete scenario-{{ scenario }}-pf-vm
+
+    {{ oc_osp_cmd }} openstack keypair delete scenario-{{ scenario }}-key
+
+    {{ oc_osp_cmd }} openstack router remove subnet scenario-{{ scenario }}-router scenario-{{ scenario }}-subnet
+    {{ oc_osp_cmd }} openstack router delete scenario-{{ scenario }}-router
+
+    {{ oc_osp_cmd }} openstack security group delete scenario-{{ scenario }}-sg
+
+    for net in $({{ oc_osp_cmd }} openstack network list | grep scenario-{{ scenario }}-network | awk '{ print $2 }'); do
+      {{ oc_osp_cmd }} openstack network delete $net
+    done
+
+- name: "delete scenario {{ scenario }} working directory"
+  ansible.builtin.file:
+    path: "{{ working_dir }}/.scenario{{ scenario }}"
+    state: absent
+
+- name: "delete scenario {{ scenario }} temporary results file"
+  ansible.builtin.file:
+    path: "{{ temp_results_file }}"
+    state: absent
