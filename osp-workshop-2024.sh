@@ -9,6 +9,9 @@ DEFAULT_KUBECONFIG_FILE=$HOME/.kube/config
 DEFAULT_OC_NAMESPACE=openstack
 DEFAULT_INVENTORY_SECRET_NAME=dataplanenodeset-openstack-edpm-ipam
 
+DATAPLANE_SSH_KEY_SECRET_NAME="dataplane-ansible-ssh-private-key-secret"
+SSH_CONFIG=$HOME/.ssh/config
+
 inventory_file=$DEFAULT_INVENTORY_FILE
 kubeconfig_file=$DEFAULT_KUBECONFIG_FILE
 oc_bin=oc
@@ -37,6 +40,7 @@ OPTIONS:
   -n VALUE        name of the OpenShift namespace where RHOSO is installed (default: $DEFAULT_OC_NAMESPACE)
   -s VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $DEFAULT_INVENTORY_SECRET_NAME)
   -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
+  -j VALUE        SSH jump host which will be used to access to the EDPM nodes by ansible; if set it will be configured in the $SSH_CONFIG file
   -h              display help
 
 NOTE: ACTION must be the last argument!
@@ -66,7 +70,32 @@ EOF
     fi
 }
 
-while getopts "b:dKs:i:p:c:o:n" opt_key; do
+function configure_ssh_jump_host() {
+    local jump_host=$1
+    if grep -q "ProxyJump $jump_host" $SSH_CONFIG; then
+        return
+    fi
+    for hostname in $(grep ansible_host $inventory_file | awk -F':' '{print $2}'); do
+        cat <<EOF >>$SSH_CONFIG
+Host $hostname
+    ProxyJump $jump_host
+EOF
+    done
+}
+
+function ensure_private_key_exists() {
+    local key_file=$1
+    local tempdir=$(mktemp -d)
+    if [ ! -e $key_file ]; then
+        $oc_bin --kubeconfig $kubeconfig_file -n $oc_namespace extract secret/$DATAPLANE_SSH_KEY_SECRET_NAME --keys=ssh-privatekey --to=$tempdir
+       mv $tempdir/ssh-privatekey $key_file
+    fi
+    # Add private key to the ssh-agent
+    eval $(ssh-agent)
+    ssh-add $key_file
+}
+
+while getopts "b:dKs:i:p:c:o:n:j:" opt_key; do
     case "$opt_key" in
        b)
            backup_name=$OPTARG
@@ -97,6 +126,9 @@ while getopts "b:dKs:i:p:c:o:n" opt_key; do
        K)
            ansible_params="$ansible_params --ask-become-pass"
            ;;
+       j)
+          jump_host=$OPTARG
+          ;;
        h|*)
            usage
            ;;
