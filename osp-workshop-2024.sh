@@ -50,7 +50,8 @@ function check_and_get_inventory() {
         if [ ! -d $DATADIR ]; then
             mkdir -p $DATADIR
         fi
-        $oc_bin --kubeconfig $kubeconfig_file -n $oc_namespace get secret $inventory_secret_name -o json | jq '.data | map_values(@base64d)' | jq -r '.inventory' > $inventory_file
+        tmp_edpm_inventory_file=$(mktemp)
+        $oc_bin --kubeconfig $kubeconfig_file -n $oc_namespace get secret $inventory_secret_name -o json | jq '.data | map_values(@base64d)' | jq -r '.inventory' > $tmp_edpm_inventory_file
         if [ $? -ne 0 ]; then
             echo
             cat << EOF
@@ -60,10 +61,8 @@ there is proper $kubeconfig_file provided and that at least one OpenStack DataPl
 EOF
             exit 1
         fi
-        # Now lets remove from the inventory file lines about ssh key which
-        # is mounted in the ansible runner pod but we want to use key provided
-        # with the -p parameter instead
-        sed -i '/ansible_ssh_private_key_file: /d' $inventory_file
+       # Now lets build very simple inventory file with just required options
+       python3 prepare_inventory.py $tmp_edpm_inventory_file $inventory_file
     fi
 }
 
