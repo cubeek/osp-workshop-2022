@@ -12,6 +12,13 @@ DEFAULT_INVENTORY_SECRET_NAME=dataplanenodeset-openstack-edpm-ipam
 DATAPLANE_SSH_KEY_SECRET_NAME="dataplane-ansible-ssh-private-key-secret"
 SSH_CONFIG=$HOME/.ssh/config
 
+# Configuration of the public subnet when running in the RH Trainings lab
+OSP_SUBNET=192.168.51.0/24
+OSP_GW_IP=192.168.51.254
+OSP_ALLOCATION_START=192.168.51.151
+OSP_ALLOCATION_END=192.168.51.199
+UTILITY_IP=172.25.250.253
+
 inventory_file=$DEFAULT_INVENTORY_FILE
 kubeconfig_file=$DEFAULT_KUBECONFIG_FILE
 oc_bin=oc
@@ -95,6 +102,23 @@ function ensure_private_key_exists() {
     ssh-add $key_file
 }
 
+function is_rh_training_lab() {
+    # Returns 0 is hostname is "workstation" and username is "student" as with
+    # that we can assume that it runs on the Red Hat Trainings Lab environment
+    is_rh_training_lab=1
+    [[ $(hostname) == "workstation" && $(whoami) == "student" ]] && is_rh_training_lab=0
+
+    return $is_rh_training_lab
+}
+
+
+function configure_routing_to_osp_ext_net() {
+    local osp_subnet=$1
+    local utility_ip=$2
+    local nic=$(/sbin/ip -o route get $utility_ip | awk '{print $3}')
+    sudo /sbin/ip route add $osp_subnet via $utility_ip dev $nic
+}
+
 while getopts "b:dKs:i:p:c:o:n:j:" opt_key; do
     case "$opt_key" in
        b)
@@ -144,7 +168,20 @@ ansible_playbook="ansible-playbook $ansible_params \
     -e workshop_message_file=$WORKSHOP_MESSAGE_FILE \
     -e oc_bin=$oc_bin \
     -e oc_namespace=$oc_namespace \
-    -e create_env_file=$DATADIR/create_env.sh"
+    -e create_env_file=$DATADIR/create_env.sh "
+
+# If script is unning in the RH Training labs (it assumes that if
+# user is "student", hostname is "workstation" then it runs in the training
+# lab), then we need to add additional route to the "External network" and
+# configure proper subnet for the OSP external network
+if is_rh_training_lab; then
+    configure_routing_to_osp_ext_net $OSP_SUBNET $UTILITY_IP
+    ansible_playbook="$ansible_playbook \
+        -e public_network_gw_ip=$OSP_GW_IP \
+        -e public_network_subnet_range=$OSP_SUBNET \
+        -e public_network_ip_allocation_start=$OSP_ALLOCATION_START \
+        -e public_network_ip_allocation_end=$OSP_ALLOCATION_END "
+fi
 
 shift $((OPTIND-1))
 main $1 $2
