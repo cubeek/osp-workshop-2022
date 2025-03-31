@@ -6,11 +6,19 @@ debug=false
 ansible_params=""
 backup_name=$DEFAULT_BACKUP_NAME
 private_key=""
+jump_host=""
 
 WORKSHOP_MESSAGE_FILE=/tmp/workshop_message
 
 function prepare_scenario() {
     check_and_get_inventory
+    if [ -n "$private_key" ]; then
+        ensure_private_key_exists $private_key
+    fi
+    if [ -n "$jump_host" ]; then
+        configure_ssh_jump_host $jump_host
+    fi
+
     rm -f $WORKSHOP_MESSAGE_FILE
 
     echo "Preparing scenario $1 ... please wait."

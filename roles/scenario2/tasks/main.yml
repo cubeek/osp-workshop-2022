@@ -3,6 +3,16 @@
   ansible.builtin.include_vars: "{{ installer }}.yml"
   tags: always
 
+- name: Install qemu-img package
+  become: yes
+  ansible.builtin.package:
+    name: qemu-img
+    state: present
+  when: installer == 'podified'
+  delegate_to: 127.0.0.1
+  run_once: true
+  tags: break
+
 - name: Run scenario on the Tripleo environment
   ansible.builtin.include_tasks: scenario.yml
   when: installer == 'tripleo'

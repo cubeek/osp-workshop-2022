@@ -1,6 +1,10 @@
 ---
 overcloudrc_file: /home/stack/overcloudrc
 public_network: public
+public_network_gw_ip: 10.0.0.1
+public_network_subnet_range: 10.0.0.0/24
+public_network_ip_allocation_start: 10.0.0.151
+public_network_ip_allocation_end: 10.0.0.254
 create_env_file: /home/stack/create_env.sh
 ssh_key_file: "{{ working_dir }}/.scenario{{ scenario }}/scenario-{{ scenario }}-key.pem"
 image_name: cirros-0.5.2-x86_64
