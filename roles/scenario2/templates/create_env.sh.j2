@@ -21,7 +21,7 @@ fi
 # Create bad image
 image_file={{ working_dir }}/.scenario{{ scenario }}/scenario-{{ scenario }}-image.img
 if [ ! -e $image_file ]; then
-    /bin/qemu-img create -f qcow2 $image_file 100M
+    /bin/qemu-img create -f qcow2 $image_file 0b
 fi
 $OC_COMMAND openstack image create scenario-{{ scenario }}-image --disk-format qcow2 --container-format bare --public < $image_file
 
