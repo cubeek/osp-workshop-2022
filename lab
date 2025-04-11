@@ -1,0 +1,209 @@
+#!/bin/bash
+
+set -e
+
+HELP="HELP"
+
+WORKING_DIR=~/osp_training
+INVENTORY_FILE=$WORKING_DIR/ansible_inventory.yml
+WORKSHOP_MESSAGE_FILE="$WORKING_DIR/.scenario$2/message"
+ROLES_DIR=$WORKING_DIR/scenarios_repo
+
+# Error codes
+E_BAD_INPUT=2
+E_SCENARIO=3
+
+# NOTE(slaweq): for now there is this variable set here to specify OSP version used
+#               but maybe it will be 2 versions of the script in final version
+#               valid values are: "podified" and "tripleo"
+INSTALLER="podified"
+
+if [ "${INSTALLER}" == "tripleo" ]; then
+        ANSIBLE_CMD="ansible-playbook -vv -i $INVENTORY_FILE -e workshop_message_file=$WORKSHOP_MESSAGE_FILE -e working_dir=$WORKING_DIR -e installer=$INSTALLER"
+else
+        #DATADIR="/tmp/ovn_training/data"
+        oc_bin=oc
+        oc_namespace="openstack"
+        compute_hosts_group_name=openstack-data-plane
+        ssh_key_file=$WORKING_DIR/compute.key
+        osp_subnet=192.168.51.0/24
+        osp_gw=192.168.51.254
+        osp_allocation_start=192.168.51.151
+        osp_allocation_end=192.168.51.199
+        utility_ip=172.25.250.253
+
+        # We need to make sure that directory where message file will be stored exists
+        if [ ! -d "$WORKING_DIR/.scenario$2" ]; then
+                mkdir -p "$WORKING_DIR/.scenario$2"
+        fi
+        nic=$(/sbin/ip -o route get $utility_ip | awk '{print $3}')
+        if ! /sbin/ip route | grep -q "$osp_subnet via $utility_ip"; then
+                sudo /sbin/ip route add $osp_subnet via $utility_ip dev $nic
+        fi
+        ANSIBLE_CMD="ansible-playbook \
+                -i $INVENTORY_FILE \
+                --private-key $ssh_key_file \
+                -e workshop_message_file=$WORKSHOP_MESSAGE_FILE \
+                -e working_dir=$WORKING_DIR \
+                -e installer=$INSTALLER \
+                -e compute_group_name=$compute_hosts_group_name \
+                -e oc_bin=$oc_bin \
+                -e oc_namespace=$oc_namespace \
+                -e public_network_gw_ip=$osp_gw \
+                -e public_network_subnet_range=$osp_subnet \
+                -e public_network_ip_allocation_start=$osp_allocation_start \
+                -e public_network_ip_allocation_end=$osp_allocation_end \
+                -e create_env_file=$WORKING_DIR/create_env.sh"
+fi
+
+
+function errcho() {
+    >&2 echo "$1"
+}
+
+
+function print_result() {
+    local action=$1
+    local scenario=$2
+    local rc=$3
+
+    case "$action" in
+        start)
+            if [ $rc -eq 0 ]; then
+                cat $WORKSHOP_MESSAGE_FILE
+                echo
+            else
+                errcho "Preparing scenario $scenario failed!"
+            fi
+            ;;
+        grade)
+            echo -ne "Grading scenario $scenario: "
+            if [ $rc -eq 0 ]; then
+                echo "PASSED!"
+                case "$scenario" in
+                    1)
+                        echo -e "\nCOMPLETION CODE: 0msk8e"
+                        ;;
+                    2)
+                        echo -e "\nCOMPLETION CODE: geg3my"
+                        ;;
+                    3)
+                        echo -e "\nCOMPLETION CODE: 7te0hl"
+                        ;;
+                    4)
+                        echo -e "\nCOMPLETION CODE: mj8ra8"
+                        ;;
+                    5)
+                        echo -e "\nCOMPLETION CODE: ax6dnw"
+                        ;;
+                    6)
+                        echo -e "\nCOMPLETION CODE: szj8ta"
+                        ;;
+                    7)
+                        echo -e "\nCOMPLETION CODE: ajkm9o"
+                        ;;
+                    8)
+                        echo -e "\nCOMPLETION CODE: vzo8ll"
+                        ;;
+                    9)
+                        echo -e "\nCOMPLETION CODE: ktn7ao"
+                        ;;
+                esac
+            else
+                echo "FAILED!"
+            fi
+            ;;
+        fix)
+            if [ $rc -eq 0 ]; then
+                echo "Scenario $scenario has been fixed!"
+            else
+                errcho "Failed to fix scenario $scenario"
+            fi
+            ;;
+    finish)
+            if [ $rc -eq 0 ]; then
+                echo "Scenario $scenario has been cleaned up."
+            else
+                errcho "Failed to clean up after scenario $scenario"
+            fi
+            ;;
+    esac
+}
+
+
+function call_ansible() {
+    pushd $ROLES_DIR >> /dev/null
+    $ANSIBLE_CMD -t $1 -e scenario=$2 $ROLES_DIR/playbooks/scenario.yml >> /tmp/ansible_scenario_output.txt
+    rc=$?
+    popd >> /dev/null
+
+    return $rc
+}
+
+
+function check_scenario_parameter() {
+    local scenario=$1
+
+    if [ "x$scenario" == "x" ]; then
+        echo "Missing scenario number"
+        echo $HELP
+        exit $E_BAD_INPUT
+    fi
+
+    if [ ! -e $ROLES_DIR/roles/scenario$scenario ]; then
+        errcho "Trying to work with scenario number that is not implemented: scenario $scenario does not exist"
+        exit $E_SCENARIO
+    fi
+
+    if [ ! -e $WORKING_DIR/.scenario$scenario ]; then
+        if [ -e $WORKING_DIR/.scenario[0-9] ]; then
+            existing_scenario=$(ls -d $WORKING_DIR/.scenario[0-9] | sed 's/.*\.scenario\([0-9]*\)/\1/g')
+            errcho "There is deployed an existing scenario $existing_scenario. Please run the cleanup by issuing following command: $0 finish $existing_scenario"
+        else
+            errcho "Scenario $scenario has not been executed yet. Please run 'start' command first as follows: $0 start $scenario"
+        fi
+        exit $E_SCENARIO
+    fi
+}
+
+
+function checks() {
+    local action=$1
+    local scenario=$2
+
+    case "$action" in
+        start|fix|grade|finish)
+            check_scenario_parameter $scenario
+            return
+            ;;
+        "")
+            errcho "Missing action"
+            echo $HELP
+            exit $E_BAD_INPUT
+            ;;
+        *)
+            errcho "Wrong action $action"
+            echo $HELP
+            exit $E_BAD_INPUT
+            ;;
+    esac
+}
+
+
+function main() {
+    local rc=1
+    local action=$1
+    local scenario=$2
+
+    checks $action $scenario
+
+    echo "Running $action action against scenario $scenario"
+    call_ansible $action $scenario
+    rc=$?
+
+    print_result $action $scenario $rc
+
+    exit $rc
+}
+
+main $@
