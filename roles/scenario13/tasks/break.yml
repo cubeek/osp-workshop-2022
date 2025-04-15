@@ -14,6 +14,16 @@
     - jq
     - openssh
 
+- name: Ensure nicMappings are configured properly
+  block:
+    - name: Upload patch script
+      ansible.builtin.template:
+        src: patch_controlplane.sh.j2
+        dest: "{{ working_dir }}/.scenario{{ scenario }}/patch_controlplane.sh"
+        mode: '0755'
+    - name: Patch OpenStackControlPlane CR
+      ansible.builtin.shell: "{{ working_dir }}/.scenario{{ scenario }}/patch_controlplane.sh"
+
 - name: Upload scenario
   ansible.builtin.template:
     src: create_env.sh.j2

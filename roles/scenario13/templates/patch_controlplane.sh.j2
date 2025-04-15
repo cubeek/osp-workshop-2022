@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+{{ oc_bin }} -n {{ oc_namespace }} patch openstackcontrolplane {{ openstackcontrolplane_cr_name }} --type=merge -p "
+spec:
+  ovn:
+    template:
+      ovnController:
+        nicMappings:
+          {{ project_net_physnet }}: {{ physnet_nic }}
+"
