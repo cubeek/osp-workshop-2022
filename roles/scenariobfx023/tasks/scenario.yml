@@ -1,0 +1,28 @@
+---
+- name: start environment
+  ansible.builtin.include_tasks:
+    file: start.yml
+    apply:
+      tags: start
+  tags: start
+
+- name: grade environment
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+  tags: grade
+
+- name: fix environment
+  ansible.builtin.include_tasks:
+    file: fix.yml
+    apply:
+      tags: fix
+  tags: fix
+
+- name: finish environment
+  ansible.builtin.include_tasks:
+    file: finish.yml
+    apply:
+      tags: finish
+  tags: finish
