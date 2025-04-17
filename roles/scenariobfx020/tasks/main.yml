@@ -1,0 +1,31 @@
+---
+- name: "Load {{ installer }} variables"
+  ansible.builtin.include_vars: "{{ installer }}.yml"
+  tags: always
+
+- name: Install qemu-img package
+  become: yes
+  ansible.builtin.package:
+    name: qemu-img
+    state: present
+  when: installer == 'podified'
+  delegate_to: 127.0.0.1
+  run_once: true
+  tags: start
+
+- name: Run scenario on the Tripleo environment
+  ansible.builtin.include_tasks: scenario.yml
+  when: installer == 'tripleo'
+  args:
+    apply:
+      when: inventory_hostname.startswith('undercloud')
+  tags: always
+
+- name: Run scenario on the Podified environment
+  ansible.builtin.include_tasks: scenario.yml
+  when: installer == 'podified'
+  args:
+    apply:
+      delegate_to: 127.0.0.1
+      run_once: true
+  tags: always

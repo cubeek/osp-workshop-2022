@@ -1,0 +1,37 @@
+---
+- name: "Load {{ installer }} variables"
+  ansible.builtin.include_vars: "{{ installer }}.yml"
+  tags: always
+
+- name: start environment
+  ansible.builtin.include_tasks:
+    file: start.yml
+    apply:
+      tags: start
+  tags: start
+
+- name: grade environment
+  ansible.builtin.include_tasks:
+    file: grade.yml
+    apply:
+      tags: grade
+      delegate_to: "{{ '127.0.0.1' if installer == 'podified' else ansible_hostname }}"
+  when: (installer == 'tripleo' and inventory_hostname.startswith('undercloud')) or installer == 'podified'
+  tags: grade
+
+- name: fix environment
+  ansible.builtin.include_tasks:
+    file: fix.yml
+    apply:
+      tags: fix
+  when: inventory_hostname in groups[compute_group_name]
+  tags: fix
+
+- name: finish environment
+  ansible.builtin.include_tasks:
+    file: finish.yml
+    apply:
+      tags: finish
+      delegate_to: "{{ '127.0.0.1' if installer == 'podified' else ansible_hostname }}"
+  when: (installer == 'tripleo' and inventory_hostname.startswith('undercloud')) or installer == 'podified'
+  tags: finish
