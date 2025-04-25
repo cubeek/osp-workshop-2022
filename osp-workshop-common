@@ -7,6 +7,7 @@ ansible_params=""
 backup_name=$DEFAULT_BACKUP_NAME
 private_key=""
 jump_host=""
+NIC_MAPPINGS=""
 
 WORKSHOP_MESSAGE_FILE=/tmp/workshop_message
 
@@ -17,6 +18,10 @@ function prepare_scenario() {
     fi
     if [ -n "$jump_host" ]; then
         configure_ssh_jump_host $jump_host
+    fi
+
+    if [ -n "$NIC_MAPPINGS" ]; then
+        ensure_nic_mappings_are_set
     fi
 
     rm -f $WORKSHOP_MESSAGE_FILE
