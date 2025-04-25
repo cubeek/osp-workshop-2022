@@ -88,6 +88,11 @@ Host $hostname
     ProxyJump $jump_host
 EOF
     done
+
+    # We also need to make sure that the known_hosts file is empty otherwise
+    # when the env was stoped and then started again ssh to the compute
+    # nodes through the jump host will not be possible
+    rm $SSH_KNOWN_HOSTS
 }
 
 function ensure_private_key_exists() {
