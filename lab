@@ -11,6 +11,12 @@ ROLES_DIR=$WORKING_DIR/scenarios_repo
 SSH_CONFIG=$HOME/.ssh/config
 SSH_KNOWN_HOSTS=$HOME/.ssh/known_hosts
 
+OPENSTACK_CONTROL_PLANE_CR_NAME="openstack-control-plane"
+PHYSNET_NIC=ens4
+PROJECT_NET_PHYSNET=datacentre
+OC_BIN=oc
+OC_NAMESPACE=openstack
+
 # Error codes
 E_BAD_INPUT=2
 E_SCENARIO=3
@@ -20,12 +26,22 @@ E_SCENARIO=3
 #               valid values are: "podified" and "tripleo"
 INSTALLER="podified"
 
+function ensure_nic_mappings_are_set() {
+    $OC_BIN -n $OC_NAMESPACE patch openstackcontrolplane $OPENSTACK_CONTROL_PLANE_CR_NAME --type=merge -p "
+spec:
+  ovn:
+   template:
+     ovnController:
+       nicMappings:
+         $PROJECT_NET_PHYSNET: $PHYSNET_NIC
+" &>/dev/null
+    $OC_BIN -n $OC_NAMESPACE wait --for=condition=Ready openstackcontrolplane/$OPENSTACK_CONTROL_PLANE_CR_NAME --timeout=180s &>/dev/null
+}
+
 if [ "${INSTALLER}" == "tripleo" ]; then
         ANSIBLE_CMD="ansible-playbook -vv -i $INVENTORY_FILE -e workshop_message_file=$WORKSHOP_MESSAGE_FILE -e working_dir=$WORKING_DIR -e installer=$INSTALLER"
 else
         #DATADIR="/tmp/ovn_training/data"
-        oc_bin=oc
-        oc_namespace="openstack"
         compute_hosts_group_name=openstack-data-plane
         ssh_key_file=$WORKING_DIR/compute.key
         osp_subnet=192.168.51.0/24
@@ -44,6 +60,7 @@ else
         fi
 
         configure_ssh_jump_host "lab@utility"
+        ensure_nic_mappings_are_set
 
         ANSIBLE_CMD="ansible-playbook \
                 -i $INVENTORY_FILE \
@@ -52,8 +69,9 @@ else
                 -e working_dir=$WORKING_DIR \
                 -e installer=$INSTALLER \
                 -e compute_group_name=$compute_hosts_group_name \
-                -e oc_bin=$oc_bin \
-                -e oc_namespace=$oc_namespace \
+                -e oc_bin=$OC_BIN \
+                -e oc_namespace=$OC_NAMESPACE \
+                -e project_net_physnet=$PROJECT_NET_PHYSNET \
                 -e public_network_gw_ip=$osp_gw \
                 -e public_network_subnet_range=$osp_subnet \
                 -e public_network_ip_allocation_start=$osp_allocation_start \

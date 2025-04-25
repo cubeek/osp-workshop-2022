@@ -8,9 +8,13 @@ DEFAULT_INVENTORY_FILE=$DATADIR/edpm-inventory.yaml
 DEFAULT_KUBECONFIG_FILE=$HOME/.kube/config
 DEFAULT_OC_NAMESPACE=openstack
 DEFAULT_INVENTORY_SECRET_NAME=dataplanenodeset-openstack-edpm-ipam
+DEFAULT_OPENSTACK_CONTROL_PLANE_CR_NAME="openstack-control-plane"
 
 DATAPLANE_SSH_KEY_SECRET_NAME="dataplane-ansible-ssh-private-key-secret"
 SSH_CONFIG=$HOME/.ssh/config
+PHYSNET_NIC=ens4
+PROJECT_NET_PHYSNET="datacentre"
+NIC_MAPPINGS="$PROJECT_NET_PHYSNET: $PHYSNET_NIC"
 
 # Configuration of the public subnet when running in the RH Trainings lab
 OSP_SUBNET=192.168.51.0/24
@@ -25,6 +29,7 @@ oc_bin=oc
 oc_namespace=$DEFAULT_OC_NAMESPACE
 inventory_secret_name=$DEFAULT_INVENTORY_SECRET_NAME
 compute_hosts_group_name=openstack-edpm-ipam
+openstack_control_plane_cr_name=$DEFAULT_OPENSTACK_CONTROL_PLANE_CR_NAME
 
 function usage {
     cat <<EOF
@@ -46,6 +51,7 @@ OPTIONS:
   -o VALUE        absolute path to the oc binary (default: oc needs to be in the one of the locations from the PATH variable)
   -n VALUE        name of the OpenShift namespace where RHOSO is installed (default: $DEFAULT_OC_NAMESPACE)
   -s VALUE        name of the OpenShift secret where EDPM inventory is stored (default: $DEFAULT_INVENTORY_SECRET_NAME)
+  -r VALUE        name of the OpenStackControlPlane CR created in OpenShift (default: $DEFAULT_OPENSTACK_CONTROL_PLANE_CR_NAME)
   -K              tell ansible to ask for the sudo password (--ask-become-pass option in ansible)
   -j VALUE        SSH jump host which will be used to access to the EDPM nodes by ansible; if set it will be configured in the $SSH_CONFIG file
   -h              display help
@@ -95,6 +101,18 @@ EOF
     rm $SSH_KNOWN_HOSTS
 }
 
+function ensure_nic_mappings_are_set() {
+    $oc_bin -n $oc_namespace patch openstackcontrolplane $openstack_control_plane_cr_name --type=merge -p "
+spec:
+  ovn:
+   template:
+     ovnController:
+       nicMappings:
+         $NIC_MAPPINGS
+"
+    $OC_BIN -n $OC_NAMESPACE wait --for=consition=Ready openstackcontrolplane/$openstack_control_plane_cr_name --timeout=60s
+}
+
 function ensure_private_key_exists() {
     local key_file=$1
     local tempdir=$(mktemp -d)
@@ -124,7 +142,7 @@ function configure_routing_to_osp_ext_net() {
     sudo /sbin/ip route add $osp_subnet via $utility_ip dev $nic
 }
 
-while getopts "b:dKs:i:p:c:o:n:j:" opt_key; do
+while getopts "b:dKs:i:p:c:o:n:j:r:" opt_key; do
     case "$opt_key" in
        b)
            backup_name=$OPTARG
@@ -157,6 +175,9 @@ while getopts "b:dKs:i:p:c:o:n:j:" opt_key; do
            ;;
        j)
           jump_host=$OPTARG
+          ;;
+       r)
+          openstack_control_plane_cr_name=$OPTARG
           ;;
        h|*)
            usage
