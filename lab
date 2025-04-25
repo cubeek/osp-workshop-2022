@@ -8,6 +8,8 @@ WORKING_DIR=~/osp_training
 INVENTORY_FILE=$WORKING_DIR/ansible_inventory.yml
 WORKSHOP_MESSAGE_FILE="$WORKING_DIR/.scenario$2/message"
 ROLES_DIR=$WORKING_DIR/scenarios_repo
+SSH_CONFIG=$HOME/.ssh/config
+SSH_KNOWN_HOSTS=$HOME/.ssh/known_hosts
 
 # Error codes
 E_BAD_INPUT=2
@@ -40,6 +42,9 @@ else
         if ! /sbin/ip route | grep -q "$osp_subnet via $utility_ip"; then
                 sudo /sbin/ip route add $osp_subnet via $utility_ip dev $nic
         fi
+
+        configure_ssh_jump_host "lab@utility"
+
         ANSIBLE_CMD="ansible-playbook \
                 -i $INVENTORY_FILE \
                 --private-key $ssh_key_file \
@@ -56,6 +61,23 @@ else
                 -e create_env_file=$WORKING_DIR/create_env.sh"
 fi
 
+function configure_ssh_jump_host() {
+    local jump_host=$1
+    if grep -q "ProxyJump $jump_host" $SSH_CONFIG; then
+        return
+    fi
+    for hostname in $(grep ansible_host $inventory_file | awk -F':' '{print $2}'); do
+        cat <<EOF >>$SSH_CONFIG
+Host $hostname
+    ProxyJump $jump_host
+EOF
+    done
+    # We also need to make sure that the known_hosts file is empty otherwise
+    # when the env was stoped and then started again ssh to the compute
+    # nodes through the jump host will not be possible
+    rm $SSH_KNOWN_HOSTS
+
+}
 
 function errcho() {
     >&2 echo "$1"
