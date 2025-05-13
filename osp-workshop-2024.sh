@@ -39,6 +39,7 @@ Usage: $(basename "$0") [OPTION] <ACTION>
 
 ACTIONS:
   scenario VALUE  prepare scenario number VALUE, can be 1-$SCENARIO_NUM
+  inventory       prepare inventory file for ansible
   backup          backup virtual environment
   restore         restore virtual environment
 
