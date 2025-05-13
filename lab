@@ -4,8 +4,8 @@ set -e
 
 HELP="HELP"
 
-WORKING_DIR=~/osp_training
-INVENTORY_FILE=$WORKING_DIR/ansible_inventory.yml
+WORKING_DIR=$HOME/osp_training
+INVENTORY_FILE=$WORKING_DIR/ansible_inventory.yaml
 WORKSHOP_MESSAGE_FILE="$WORKING_DIR/.scenario$2/message"
 ROLES_DIR=$WORKING_DIR/scenarios_repo
 SSH_CONFIG=$HOME/.ssh/config
@@ -25,6 +25,24 @@ E_SCENARIO=3
 #               but maybe it will be 2 versions of the script in final version
 #               valid values are: "podified" and "tripleo"
 INSTALLER="podified"
+
+function configure_ssh_jump_host() {
+    local jump_host=$1
+    if grep -q "ProxyJump $jump_host" $SSH_CONFIG; then
+        return
+    fi
+    for hostname in $(grep ansible_host $INVENTORY_FILE | awk -F':' '{print $2}'); do
+        cat <<EOF >>$SSH_CONFIG
+Host $hostname
+    ProxyJump $jump_host
+EOF
+    done
+    # We also need to make sure that the known_hosts file is empty otherwise
+    # when the env was stoped and then started again ssh to the compute
+    # nodes through the jump host will not be possible
+    rm $SSH_KNOWN_HOSTS
+
+}
 
 function ensure_nic_mappings_are_set() {
     $OC_BIN -n $OC_NAMESPACE patch openstackcontrolplane $OPENSTACK_CONTROL_PLANE_CR_NAME --type=merge -p "
@@ -78,24 +96,6 @@ else
                 -e public_network_ip_allocation_end=$osp_allocation_end \
                 -e create_env_file=$WORKING_DIR/create_env.sh"
 fi
-
-function configure_ssh_jump_host() {
-    local jump_host=$1
-    if grep -q "ProxyJump $jump_host" $SSH_CONFIG; then
-        return
-    fi
-    for hostname in $(grep ansible_host $inventory_file | awk -F':' '{print $2}'); do
-        cat <<EOF >>$SSH_CONFIG
-Host $hostname
-    ProxyJump $jump_host
-EOF
-    done
-    # We also need to make sure that the known_hosts file is empty otherwise
-    # when the env was stoped and then started again ssh to the compute
-    # nodes through the jump host will not be possible
-    rm $SSH_KNOWN_HOSTS
-
-}
 
 function errcho() {
     >&2 echo "$1"
