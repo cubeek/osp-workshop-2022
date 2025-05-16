@@ -103,6 +103,9 @@ function main() {
             fi
             prepare_scenario $2
             ;;
+        "inventory")
+            check_and_get_inventory
+            ;;
         "backup")
             # The backup action is called snapshot
             do_snapshot snapshot

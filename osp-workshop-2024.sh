@@ -2,9 +2,9 @@
 
 WORKDIR=$(dirname "$0")
 source $WORKDIR/osp-workshop-common
-    DATADIR="/tmp/ovn_training/data"
+DATADIR=$HOME/osp_training
 
-DEFAULT_INVENTORY_FILE=$DATADIR/edpm-inventory.yaml
+DEFAULT_INVENTORY_FILE=$DATADIR/ansible_inventory.yaml
 DEFAULT_KUBECONFIG_FILE=$HOME/.kube/config
 DEFAULT_OC_NAMESPACE=openstack
 DEFAULT_INVENTORY_SECRET_NAME=dataplanenodeset-openstack-edpm-ipam
@@ -39,6 +39,7 @@ Usage: $(basename "$0") [OPTION] <ACTION>
 
 ACTIONS:
   scenario VALUE  prepare scenario number VALUE, can be 1-$SCENARIO_NUM
+  inventory       prepare inventory file for ansible
   backup          backup virtual environment
   restore         restore virtual environment
 
