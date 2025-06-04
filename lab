@@ -27,9 +27,7 @@ E_SCENARIO=3
 INSTALLER="podified"
 
 function prepare_inventory_file() {
-    if test -e "/home/student/osp_training/ansible_inventory.yaml"; then
-        return
-    else
+    if ! test -s "/home/student/osp_training/ansible_inventory.yaml"; then
         cd /home/student/osp_training/scenarios_repo
         bash osp-workshop-2024.sh -s dataplanenodeset-openstack-data-plane -c ~/.auth/ocp4-kubeconfig inventory
         cd -
@@ -37,11 +35,9 @@ function prepare_inventory_file() {
 }
 
 function configure_oc_auth() {
-    if test -e "/home/student/.kube/config"; then
-        return
-    else
+    if ! test -s "/home/student/.kube/config"; then
         mkdir -p ~/.kube
-       scp lab@utility:.kube/config ~/.kube/
+        scp lab@utility:.kube/config ~/.kube/
     fi
 }
 
