@@ -55,7 +55,7 @@ EOF
     # We also need to make sure that the known_hosts file is empty otherwise
     # when the env was stoped and then started again ssh to the compute
     # nodes through the jump host will not be possible
-    rm $SSH_KNOWN_HOSTS
+    :> $SSH_KNOWN_HOSTS
 
 }
 
