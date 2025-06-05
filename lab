@@ -26,6 +26,21 @@ E_SCENARIO=3
 #               valid values are: "podified" and "tripleo"
 INSTALLER="podified"
 
+function prepare_inventory_file() {
+    if ! test -s "/home/student/osp_training/ansible_inventory.yaml"; then
+        cd /home/student/osp_training/scenarios_repo
+        bash osp-workshop-2024.sh -s dataplanenodeset-openstack-data-plane -c ~/.auth/ocp4-kubeconfig inventory
+        cd -
+    fi
+}
+
+function configure_oc_auth() {
+    if ! test -s "/home/student/.kube/config"; then
+        mkdir -p ~/.kube
+        scp lab@utility:.kube/config ~/.kube/
+    fi
+}
+
 function configure_ssh_jump_host() {
     local jump_host=$1
     if grep -q "ProxyJump $jump_host" $SSH_CONFIG; then
@@ -40,7 +55,7 @@ EOF
     # We also need to make sure that the known_hosts file is empty otherwise
     # when the env was stoped and then started again ssh to the compute
     # nodes through the jump host will not be possible
-    rm $SSH_KNOWN_HOSTS
+    :> $SSH_KNOWN_HOSTS
 
 }
 
@@ -77,8 +92,10 @@ else
                 sudo /sbin/ip route add $osp_subnet via $utility_ip dev $nic
         fi
 
+	configure_oc_auth
         configure_ssh_jump_host "lab@utility"
         ensure_nic_mappings_are_set
+	prepare_inventory_file
 
         ANSIBLE_CMD="ansible-playbook \
                 -i $INVENTORY_FILE \
