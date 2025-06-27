@@ -6,6 +6,8 @@ set -e
 
 if ! {{ oc_osp_cmd }} openstack network show {{ public_network }} > /dev/null 2> /dev/null; then
     {{ oc_osp_cmd }} openstack network create --external --provider-network-type flat --provider-physical-network datacentre {{ public_network }}
+fi
+if ! {{ oc_osp_cmd }} openstack subnet show {{ public_network }}_subnet > /dev/null 2> /dev/null; then
     {{ oc_osp_cmd }} openstack subnet create --no-dhcp --gateway {{ public_network_gw_ip }} --network {{ public_network }} --subnet-range {{ public_network_subnet_range }} --allocation-pool start={{ public_network_ip_allocation_start }},end={{ public_network_ip_allocation_end }} {{ public_network }}_subnet
 fi
 
