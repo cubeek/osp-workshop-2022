@@ -28,7 +28,7 @@ INSTALLER="podified"
 
 function execute_workarounds2() {
        echo -e "DEBUG: in execute_workarounds" >> /tmp/log
-       ansible-playbook -i $INVENTORY_FILE /home/student/osp_training/scenarios_repo/playbooks/workarounds2.yml -e compute_group_name=$compute_hosts_group_name -e installer=podified
+       ansible-playbook -i $INVENTORY_FILE /home/student/osp_training/scenarios_repo/playbooks/workarounds2.yml -e compute_group_name=$compute_hosts_group_name -e installer=podified >> /tmp/ansible_scenario_output.txt
 }
 
 function prepare_inventory_file() {
