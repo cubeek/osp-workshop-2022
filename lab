@@ -26,10 +26,16 @@ E_SCENARIO=3
 #               valid values are: "podified" and "tripleo"
 INSTALLER="podified"
 
+function workaround_config_drive() {
+       echo -e "DEBUG: in execute_workarounds" >> /tmp/log
+       ansible-playbook -i $INVENTORY_FILE /home/student/osp_training/scenarios_repo/playbooks/workarounds2.yml -e compute_group_name=$compute_hosts_group_name -e installer=podified >> /tmp/ansible_scenario_output.txt
+}
+
 function prepare_inventory_file() {
     if ! test -s "/home/student/osp_training/ansible_inventory.yaml"; then
         cd /home/student/osp_training/scenarios_repo
         bash osp-workshop-2024.sh -s dataplanenodeset-openstack-data-plane -c ~/.auth/ocp4-kubeconfig inventory
+	workaround_config_drive
         cd -
     fi
 }
