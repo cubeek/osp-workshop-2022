@@ -1,0 +1,14 @@
+---
+- name: Upload crudini to the hosts
+  ansible.builtin.copy:
+    src: "{{ crudini_rpm }}"
+    dest: "/tmp/{{ crudini_rpm }}"
+  become: yes
+
+- name: install crudini
+  ansible.builtin.shell: rpm -q crudini || rpm -Uvh /tmp/{{ crudini_rpm }}
+  become: yes
+
+- name: "Ensure force_config_drive is set to False in nova.conf"
+  ansible.builtin.shell: "crudini --set {{ nova_config_path }} DEFAULT force_config_drive False"
+  become: yes

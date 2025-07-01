@@ -1,0 +1,3 @@
+---
+nova_config_path: /var/lib/openstack/config/nova/01-nova.conf
+nova_compute_service_name: edpm_nova_compute.service
